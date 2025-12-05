@@ -93,7 +93,7 @@ export default function CRMCustDspComponent() {
 
       <div className="mt-4">
         <a id="crm-link" href="#" className="text-blue-600 underline">Click to Test Generated Link</a>
-        <div id="crm-string-link" className="mt-2 p-2 bg-gray-100 rounded text-sm break-all"></div>
+        <div id="crm-string-link" className="mt-2 p-2 text-gray-700 bg-gray-100 rounded text-sm break-all"></div>
       </div>
     </div>
   );

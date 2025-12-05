@@ -2,6 +2,7 @@ import Image from "next/image";
 import CustSrchComponent from "@/app/components/CustSrchComponent";
 import CRMCustDspComponent from "@/app/components/CRMCustDspComponent";
 import InfoBanner from "@/app/components/InfoBanner";
+import CustSrchByPhoneComponent from "@/app/components/CustSrchByPhoneComponent";
 
 export default function Home() {
   return (
@@ -11,9 +12,18 @@ export default function Home() {
 
         <InfoBanner />
 
-          <CustSrchComponent />
+        <div className="flex gap-6 w-full">
+          <div className="flex-1">
+            <CustSrchComponent />
+          </div>
+          <div className="flex-1">
+            <CustSrchByPhoneComponent />
+          </div>
+        </div>
 
-        <CRMCustDspComponent />
+        <div className="flex justify-center w-full">
+          <CRMCustDspComponent />
+        </div>
 
       </main>
     </div>
