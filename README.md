@@ -1,22 +1,40 @@
 # Jack Henry Browser Integration - Proof of Concept
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 This is a proof of concept demonstrating browser integration with Jack Henry's SilverLake system. Built with Next.js and React, this application generates custom protocol hyperlinks (`jhaXp:`) that can launch Jack Henry applications with pre-populated data.
 
-
+**[View Live Demo](https://fnm-jh-poc.vercel.app/)**
 
 ## Overview
 
-This POC showcases how web applications can seamlessly integrate with Jack Henry's desktop applications by generating specially formatted hyperlinks. When clicked, these links trigger the Jack Henry client software with specific transaction data, streamlining workflows between web and desktop environments.
+This POC is part of the learning process for software development with Jack Henry's system. The current focus is learning how to generate specially formatted hyperlinks that, when clicked, trigger the Jack Henry client software with specific transaction data, streamlining workflows between web and desktop environments.
+
+## Based On
+
+This project is a React implementation based on the official Jack Henry Xperience tutorials:
+- [SilverLake Customer Search Hyperlink Tutorial](https://jackhenry.dev/xperience/tutorials/sl-cust-srch-hyperlink/)
+- [CRM Customer Display Hyperlink Tutorial](https://jackhenry.dev/xperience/tutorials/crm-cust-dsp-hyperlink/)
+
+The components shown in this project are React versions of the examples demonstrated in these tutorials.
 
 ## Features
 
-### Customer Search Component
+### Customer Search by Name Component
 Generate hyperlinks to search for customers in SilverLake by first name.
 
 **Required Fields:**
 - First Name
 - Instance
-- Inst Rt Id (defaults to `011001276` if not provided)
+- Inst Rt Id
+
+### Customer Search by Phone Component
+Generate hyperlinks to search for customers in SilverLake by phone number. Phone numbers are automatically sanitized to contain only digits.
+
+**Required Fields:**
+- Phone Number (automatically strips non-digit characters)
+- Instance
+- Inst Rt Id
 
 ### CRM Customer Display Component
 Generate hyperlinks to display specific customer records in the CRM system.
@@ -93,23 +111,26 @@ Key dependencies:
 ```
 app/
 ├── components/
-│   ├── CustSrchComponent.tsx      # Customer search form
-│   ├── CRMCustDspComponent.tsx    # CRM customer display form
-│   └── InfoBanner.tsx             # Informational banner
-├── page.tsx                        # Main page
-└── layout.tsx                      # Root layout
+│   ├── CustSrchComponent.tsx           # Customer search by name form
+│   ├── CustSrchByPhoneComponent.tsx    # Customer search by phone form
+│   ├── CRMCustDspComponent.tsx         # CRM customer display form
+│   └── InfoBanner.tsx                  # Informational banner
+├── page.tsx                             # Main page
+└── layout.tsx                           # Root layout
 ```
 
 ## Components
 
 ### CustSrchComponent
-Generates customer search hyperlinks for SilverLake.
+Generates customer search hyperlinks for SilverLake based on customer first name.
+
+### CustSrchByPhoneComponent
+Generates customer search hyperlinks for SilverLake based on phone number. Automatically sanitizes phone input to include only digits in the generated link.
 
 ### CRMCustDspComponent
 Generates CRM customer display hyperlinks.
 
-### InfoBanner
-Displays project information and context.
+
 
 ## Future Enhancements
 
@@ -124,6 +145,10 @@ Displays project information and context.
 - This is a proof of concept for demonstration purposes
 - Requires Jack Henry client software to be installed and configured
 - The `jhaXp:` protocol must be registered with the operating system
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Learn More
 

@@ -7,93 +7,76 @@ export default function CRMCustDspComponent() {
   const [aba, setAba] = useState('');
   const [cust, setCust] = useState('');
   const [instance, setInstance] = useState('');
+  const [link, setLink] = useState('');
+  const [displayLink, setDisplayLink] = useState('');
 
   const xmlns = 'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://jackhenry.com/jxchange/JES/2008"';
 
+  const finalAba = (aba && aba.length === 9) ? aba : '011001276';
+  const msg =
+    `<CRMCustDsp ${xmlns}>` +
+    `<XPMsgRqHdr><XPHdr><InstRtId>${finalAba}</InstRtId>` +
+    `</XPHdr></XPMsgRqHdr><CustId>${cust}</CustId>` +
+    `</CRMCustDsp>`;
+
+  const href = `jhaXp:Instance=${instance}&Msg=${msg}`;
+
+  const encodedForDisplay = he.encode(href, { strict: true });
+
   const createHyperlink = () => {
-    if (aba?.length > 0 && cust?.length > 0 && instance?.length > 0) {
-      // Override the global default setting:
-      he.encode.options.useNamedReferences = true;
-
-      let instanceString = '';
-      let abaString = '';
-      let custString = '';
-
-      if (instance && instance.length > 0) {
-        instanceString = 'jhaXp:Instance=' +
-          instance +
-          '&Msg=<CRMCustDsp ' +
-          xmlns + '>' +
-          '<XPMsgRqHdr><XPHdr>';
-      }
-
-      const finalAba = (aba && aba.length === 9) ? aba : '011001276';
-      abaString = '<InstRtId>' + finalAba + '</InstRtId>' +
-        '</XPHdr></XPMsgRqHdr>';
-
-      if (cust && cust.length > 0) {
-        custString = '<CustId>' + cust +
-          '</CustId></CRMCustDsp>&amp;';
-      }
-
-      const link: string = he.encode(instanceString + abaString + custString,
-        {
-          strict: true,
-        },
-      );
-
-      console.log(link);
-
-      const linkElement = document.getElementById('crm-link');
-      const stringLinkElement = document.getElementById('crm-string-link');
-
-      if (linkElement) {
-        linkElement.setAttribute('href', link);
-      }
-      if (stringLinkElement) {
-        stringLinkElement.innerHTML = link;
-      }
-    }
+    setLink(href);
+    setDisplayLink(encodedForDisplay);
   };
 
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-semibold">CRM Customer Display</h2>
-
       <div className="flex flex-col gap-3">
+        <h2 className="text-xl font-semibold">CRM Customer Display</h2>
         <input
           type="text"
           placeholder="ABA (9 digits)"
           value={aba}
           onChange={(e) => setAba(e.target.value)}
           maxLength={9}
-          className="px-3 py-2 border border-gray-300 rounded"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
         />
         <input
           type="text"
           placeholder="Customer ID"
           value={cust}
           onChange={(e) => setCust(e.target.value)}
-          className="px-3 py-2 border border-gray-300 rounded"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
         />
         <input
           type="text"
           placeholder="Instance"
           value={instance}
           onChange={(e) => setInstance(e.target.value)}
-          className="px-3 py-2 border border-gray-300 rounded"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
         />
         <button
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded disabled:bg-gray-400 disabled:cursor-not-allowed m-4"
+          type="button"
           onClick={createHyperlink}
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          disabled={!aba || !cust || !instance}
         >
-          Create Hyperlink
+          Create Test Hyperlink
         </button>
       </div>
-
       <div className="mt-4">
-        <a id="crm-link" href="#" className="text-blue-600 underline">Click to Test Generated Link</a>
-        <div id="crm-string-link" className="mt-2 p-2 text-gray-700 bg-gray-100 rounded text-sm break-all"></div>
+        <div className="flex">
+          <a id="link" className="text-blue-600 underline" href={link || '#'}>Click to Test Generated Link</a>
+        </div>
+
+        <h3 className="pt-4"> Link details:</h3>
+        <div className="text-center p-6 mt-4 bg-gray-50 rounded-lg">
+          <div id="string-link" className="text-sm text-gray-700 break-all font-mono">{link}</div>
+        </div>
+
+        <h3 className="pt-4"> Encoded Display of the link:</h3>
+        <div className="text-center p-6 mt-4 bg-gray-50 rounded-lg">
+          <div id="string-link" className="text-sm text-gray-700 break-all font-mono">{displayLink}</div>
+        </div>
       </div>
     </div>
   );
