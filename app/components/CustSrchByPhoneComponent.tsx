@@ -14,7 +14,7 @@ export default function CustSrchByPhoneComponent() {
     const msg =
         `<CustSrch ${xmlns}>` +
         `<XPMsgRqHdr><XPHdr><InstRtId>${instRtId}</InstRtId>` +
-        `</XPHdr></XPMsgRqHdr><PhoneNum>${phoneNumber}</PhoneNum>` +
+        `</XPHdr></XPMsgRqHdr><PhoneNum>${phoneNumber.replace(/\D/g, '')}</PhoneNum>` +
         `</CustSrch>`;
 
     const href = `jhaXp:Instance=${instance}&Msg=${msg}`; // or encodeURIComponent(msg) if they require it
