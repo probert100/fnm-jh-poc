@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import * as he from 'he';
 
-export default function CustSrchByPhoneComponent() {
+export default function StartCallComponent() {
     const [phoneNumber, setPhoneNumber] = useState('');
     const [instance, setInstance] = useState('');
     const [instRtId, setInstRtId] = useState('');
@@ -11,11 +11,24 @@ export default function CustSrchByPhoneComponent() {
     const [displayLink, setDisplayLink] = useState('');
 
     const xmlns = 'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://jackhenry.com/jxchange/JES/2008"';
-    const msg =
+    const msgOld =
         `<CustSrch ${xmlns}>` +
         `<XPMsgRqHdr><XPHdr><InstRtId>${instRtId}</InstRtId>` +
         `</XPHdr></XPMsgRqHdr><PhoneNum>${phoneNumber.replace(/\D/g, '')}</PhoneNum>` +
         `</CustSrch>`;
+
+    const msg =
+        `<StartCallLink>` +
+            `<XPMsgRqHdr>` +
+                `<XPHdr>` +
+                    `<ConsumerProd>Xperience</ConsumerProd>` +
+                    `<AuditUsrId>XperienceClientAgent</AuditUsrId>` +
+                    `<InstRtId>${instRtId}</InstRtId>` +
+                `</XPHdr>` +
+            `</XPMsgRqHdr>` +
+            `<PhoneNum>${phoneNumber.replace(/\D/g, '')}</PhoneNum>` +
+            `<Identifier>${instRtId}</Identifier>` +
+        `</StartCallLink>`;
 
     const href = `jhaXp:Instance=${instance}&Msg=${msg}`; // or encodeURIComponent(msg) if they require it
 
@@ -29,7 +42,7 @@ export default function CustSrchByPhoneComponent() {
     return (
         <div className="space-y-4">
             <div className="flex flex-col gap-3">
-                <h2 className="text-xl font-semibold">Phone # search in SilverLake</h2>
+                <h2 className="text-xl font-semibold">Phone # search in Xperience </h2>
                 <input
                     type="text"
                     placeholder="336-704-9191"

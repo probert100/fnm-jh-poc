@@ -3,6 +3,7 @@ import CustSrchComponent from "@/app/components/CustSrchComponent";
 import CRMCustDspComponent from "@/app/components/CRMCustDspComponent";
 import InfoBanner from "@/app/components/InfoBanner";
 import CustSrchByPhoneComponent from "@/app/components/CustSrchByPhoneComponent";
+import StartCallComponent from "@/app/components/StartCallComponent";
 
 export default function Home() {
   return (
@@ -12,17 +13,28 @@ export default function Home() {
 
         <InfoBanner />
 
+        <h2 className="text-2xl font-bold text-gray-600 dark:text-gray-200 text-center w-full">Phone based test searches</h2>
+
         <div className="flex gap-6 w-full">
+
           <div className="flex-1">
-            <CustSrchComponent />
+              <StartCallComponent />
+
           </div>
           <div className="flex-1">
             <CustSrchByPhoneComponent />
           </div>
         </div>
 
-        <div className="flex justify-center w-full">
-          <CRMCustDspComponent />
+        <hr className="w-full border-t border-gray-300" />
+
+        <div className="flex gap-6 w-full">
+            <div className="flex-1">
+                 <CRMCustDspComponent />
+            </div>
+            <div className="flex-1">
+                <CustSrchComponent />
+            </div>
         </div>
 
       </main>
