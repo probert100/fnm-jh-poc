@@ -31,21 +31,25 @@ export default function WebexIntegrationComponent() {
 
     useEffect(() => {
         // Check if SDK is loaded via CDN
-        if (typeof window !== 'undefined' && window.webex) {
+        initializeSDK()
+            .then(()=>{
+               setError('SDK loaded successfully')
+            })
+      /*  if (typeof window !== 'undefined' && window.webex) {
             setIsSDKLoaded(true);
         } else {
             setError('Webex SDK not loaded. Include the SDK script in your HTML.');
-        }
+        }*/
     }, []);
 
     const initializeSDK = async () => {
         try {
             setError('');
-
+/*
             if (!window.webex) {
                 throw new Error('Webex SDK not available');
             }
-
+*/
             // Initialize with logging configuration
             const config = {
                 logs: {
@@ -123,7 +127,7 @@ export default function WebexIntegrationComponent() {
                         className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded disabled:bg-gray-400 disabled:cursor-not-allowed"
                         type="button"
                         onClick={initializeSDK}
-                        disabled={!isSDKLoaded}
+
                     >
                         Initialize Webex SDK
                     </button>
