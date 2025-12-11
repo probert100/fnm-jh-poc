@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Application, {IWebexAppsUserState} from '@webex/embedded-app-sdk';
+import Application, {IWebexAppsUserState, IWebexAppsSidebar, IBadge} from '@webex/embedded-app-sdk';
 import {IWebexAppsApplication} from "@webex/embedded-app-sdk/dist/module/types/application.interfaces";
+import {BADGE_TYPE} from "@webex/embedded-app-sdk/dist/module/constants/sidebar";
 
 interface WebexSDKConfig {
     logs?: {
@@ -28,6 +29,7 @@ export default function WebexIntegrationComponent() {
     const [deviceType, setDeviceType] = useState<string|null>('');
     const [error, setError] = useState<string>('');
     const [app, setApp] = useState<Application | null>(null);
+    const [sidebar, setSidebar] = useState<IWebexAppsSidebar  | null>(null);
 
     useEffect(() => {
         // Check if SDK is available (this just checks, doesn't initialize)
@@ -48,6 +50,15 @@ export default function WebexIntegrationComponent() {
 
                 setApp(webexApp);
                 setIsInitialized(true);
+
+                const webexSidebar = await webexApp.context.getSidebar() as IWebexAppsSidebar;
+                if (webexSidebar.badge) {
+                    setSidebar(webexSidebar)
+                    const isBadgeSet = await webexSidebar.showBadge({
+                        badgeType: BADGE_TYPE.COUNT,
+                        count: 100
+                    });
+                }
 
                 // Get user information (static in 2.x)
                 const userData = webexApp.application.states.user;
@@ -82,6 +93,8 @@ export default function WebexIntegrationComponent() {
 
             setApp(webexApp);
             setIsInitialized(true);
+
+
 
             // Get user information (static in 2.x)
             const userData = webexApp.application.states.user;
@@ -250,7 +263,10 @@ export default function WebexIntegrationComponent() {
                             <div>
                                 <strong>User State:</strong>
                                 <pre className="mt-1 p-2 bg-white rounded text-xs overflow-x-auto">
-                                    {JSON.stringify(app.application?.states?.user, null, 2)}
+                                    {
+
+                                        //JSON.stringify(app.application?.states?.user, null, 2)
+                                    }
                                 </pre>
                             </div>
                         </div>
