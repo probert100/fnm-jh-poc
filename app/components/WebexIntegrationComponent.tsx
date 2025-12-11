@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Application, {IWebexAppsUserState, IWebexAppsSidebar, IBadge} from '@webex/embedded-app-sdk';
+import Application, {IWebexAppsUserState, IWebexAppsSidebar, IBadge, ICall} from '@webex/embedded-app-sdk';
 import {IWebexAppsApplication} from "@webex/embedded-app-sdk/dist/module/types/application.interfaces";
 import {BADGE_TYPE} from "@webex/embedded-app-sdk/dist/module/constants/sidebar";
 
@@ -30,6 +30,7 @@ export default function WebexIntegrationComponent() {
     const [error, setError] = useState<string>('');
     const [app, setApp] = useState<Application | null>(null);
     const [sidebar, setSidebar] = useState<IWebexAppsSidebar  | null>(null);
+    const [call, setCall] = useState<ICall | null>(null);
 
     useEffect(() => {
         // Check if SDK is available (this just checks, doesn't initialize)
@@ -59,6 +60,19 @@ export default function WebexIntegrationComponent() {
                         count: 100
                     });
                 }
+
+                webexApp.listen()
+                        .then(() => {
+                            webexApp.on("sidebar:callStateChanged", (call) => {
+                                console.log("Call state changed. New call object:", call);
+                                setCall(call as ICall)
+                            })
+                        })
+                        .catch((reason: string) => {
+                            const errorMessage = Application.ErrorCodes[reason as keyof typeof Application.ErrorCodes] || `Unknown error (${reason})`;
+                            alert("listen: fail reason=" + errorMessage);
+                        });
+
 
                 // Get user information (static in 2.x)
                 const userData = webexApp.application.states.user;
@@ -263,9 +277,19 @@ export default function WebexIntegrationComponent() {
                             <div>
                                 <strong>User State:</strong>
                                 <pre className="mt-1 p-2 bg-white rounded text-xs overflow-x-auto">
+                                    Currently commented out.
                                     {
 
                                         //JSON.stringify(app.application?.states?.user, null, 2)
+                                    }
+                                </pre>
+                            </div>
+                            <div>
+                                <strong>Call State:</strong>
+                                <pre className="mt-1 p-2 bg-white rounded text-xs overflow-x-auto">
+                                    {
+
+                                        JSON.stringify(call, null, 2)
                                     }
                                 </pre>
                             </div>
