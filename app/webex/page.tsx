@@ -1,6 +1,7 @@
 
 import InfoBanner from "@/app/components/InfoBanner";
 import WebexIntegrationComponent from "@/app/components/WebexIntegrationComponent";
+import UserPreferencesComponent from "@/app/components/UserPreferencesComponent";
 
 export default function Webex() {
     return (
@@ -9,6 +10,7 @@ export default function Webex() {
 
 
                 <InfoBanner />
+                <UserPreferencesComponent />
 
                 <h2 className="text-2xl font-bold text-gray-600 dark:text-gray-200 text-center w-full">Webex Integration Testing</h2>
 

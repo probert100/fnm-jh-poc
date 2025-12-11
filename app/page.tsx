@@ -4,6 +4,7 @@ import CRMCustDspComponent from "@/app/components/CRMCustDspComponent";
 import InfoBanner from "@/app/components/InfoBanner";
 import CustSrchByPhoneComponent from "@/app/components/CustSrchByPhoneComponent";
 import StartCallComponent from "@/app/components/StartCallComponent";
+import UserPreferencesComponent from "@/app/components/UserPreferencesComponent";
 
 export default function Home() {
   return (
@@ -12,6 +13,7 @@ export default function Home() {
 
 
         <InfoBanner />
+          <UserPreferencesComponent />
 
         <h2 className="text-2xl font-bold text-gray-600 dark:text-gray-200 text-center w-full">Phone based test searches</h2>
 

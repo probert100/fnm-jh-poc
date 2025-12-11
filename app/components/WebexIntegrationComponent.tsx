@@ -296,6 +296,16 @@ export default function WebexIntegrationComponent() {
                         </div>
                     </div>
                 )}
+
+                <div>
+                    <strong>Call State:</strong>
+                    <pre className="mt-1 p-2 bg-white rounded text-xs overflow-x-auto">
+                                    {
+
+                                        JSON.stringify(call, null, 2)
+                                    }
+                                </pre>
+                </div>
             </div>
         </div>
     );
