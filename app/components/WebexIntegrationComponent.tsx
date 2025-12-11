@@ -227,6 +227,35 @@ export default function WebexIntegrationComponent() {
                         <li>Other SDK requests: 20 requests per minute</li>
                     </ul>
                 </div>
+
+                {isInitialized && app && (
+                    <div className="p-3 rounded-lg bg-gray-50 border border-gray-200">
+                        <h3 className="font-semibold mb-2">App Info:</h3>
+                        <div className="space-y-2 text-sm">
+                            <div>
+                                <strong>Device Type:</strong> {app.deviceType || 'N/A'}
+                            </div>
+                            <div>
+                                <strong>About:</strong>
+                                <pre className="mt-1 p-2 bg-white rounded text-xs overflow-x-auto">
+                                    {JSON.stringify(app.about, null, 2)}
+                                </pre>
+                            </div>
+                            <div>
+                                <strong>Capabilities:</strong>
+                                <pre className="mt-1 p-2 bg-white rounded text-xs overflow-x-auto">
+                                    {JSON.stringify(app.capabilities, null, 2)}
+                                </pre>
+                            </div>
+                            <div>
+                                <strong>User State:</strong>
+                                <pre className="mt-1 p-2 bg-white rounded text-xs overflow-x-auto">
+                                    {JSON.stringify(app.application?.states?.user, null, 2)}
+                                </pre>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );
