@@ -103,7 +103,7 @@ export default function UserPreferencesComponent() {
                     </p>
                 </div>
 
-                {/* Current Settings Display */}
+                {/* Current Settings Display
                 <div className="p-3 rounded-lg bg-blue-50 border border-blue-200">
                     <h3 className="font-semibold text-sm mb-2">Current Settings:</h3>
                     <div className="text-xs space-y-1">
@@ -115,6 +115,7 @@ export default function UserPreferencesComponent() {
                         </div>
                     </div>
                 </div>
+                */}
 
                 {/* Action Buttons */}
                 <div className="flex gap-3">

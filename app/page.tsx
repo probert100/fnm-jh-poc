@@ -5,6 +5,7 @@ import InfoBanner from "@/app/components/InfoBanner";
 import CustSrchByPhoneComponent from "@/app/components/CustSrchByPhoneComponent";
 import StartCallComponent from "@/app/components/StartCallComponent";
 import UserPreferencesComponent from "@/app/components/UserPreferencesComponent";
+import AboutComponent from "@/app/components/AboutComponent";
 
 export default function Home() {
   return (
@@ -12,7 +13,7 @@ export default function Home() {
       <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-start gap-8 py-32 px-16 bg-white dark:bg-black sm:items-start">
 
 
-        <InfoBanner />
+        <InfoBanner /><AboutComponent/>
           <UserPreferencesComponent />
 
         <h2 className="text-2xl font-bold text-gray-600 dark:text-gray-200 text-center w-full">Phone based test searches</h2>
