@@ -30,26 +30,44 @@ export default function WebexIntegrationComponent() {
     const [app, setApp] = useState<Application | null>(null);
 
     useEffect(() => {
-        // Check if SDK is loaded via CDN
-        initializeSDK()
-            .then(()=>{
-               setError('SDK loaded successfully')
-            })
-      /*  if (typeof window !== 'undefined' && window.webex) {
-            setIsSDKLoaded(true);
-        } else {
-            setError('Webex SDK not loaded. Include the SDK script in your HTML.');
-        }*/
+        // Check if SDK is available (this just checks, doesn't initialize)
+        const checkSDK = async () => {
+            try {
+                // Try to import the SDK - if it works, SDK is loaded
+                setIsSDKLoaded(true);
+
+                // Auto-initialize on mount
+                const config = {
+                    logs: {
+                        logLevel: 0 // 0=INFO, 1=WARN, 2=ERROR, 3=SILENT
+                    }
+                };
+
+                const webexApp: Application = new Application(config);
+                await webexApp.onReady();
+
+                setApp(webexApp);
+                setIsInitialized(true);
+
+                // Get user information (static in 2.x)
+                const userData = webexApp.application.states.user;
+                setUser(userData);
+
+                // Get device type
+                setDeviceType(webexApp.deviceType);
+
+            } catch (err) {
+                setError(`Failed to initialize: ${err instanceof Error ? err.message : 'Unknown error'}`);
+                console.error('Webex SDK initialization error:', err);
+            }
+        };
+
+        checkSDK();
     }, []);
 
     const initializeSDK = async () => {
         try {
             setError('');
-/*
-            if (!window.webex) {
-                throw new Error('Webex SDK not available');
-            }
-*/
             // Initialize with logging configuration
             const config = {
                 logs: {
@@ -57,7 +75,7 @@ export default function WebexIntegrationComponent() {
                 }
             };
 
-            const webexApp:Application = new  Application(config);
+            const webexApp: Application = new Application(config);
 
             // Wait for SDK to be ready
             await webexApp.onReady();
@@ -77,6 +95,8 @@ export default function WebexIntegrationComponent() {
             console.error('Webex SDK initialization error:', err);
         }
     };
+
+
 
     const getCapabilities = () => {
         if (app) {
