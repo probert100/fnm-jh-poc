@@ -146,16 +146,16 @@ export default function WebexIntegrationComponent() {
                 <h2 className="text-xl font-semibold">Webex EAF SDK 2.x Integration</h2>
 
                 {/* SDK Status */}
-                <div className="p-3 rounded-lg bg-gray-50 border border-gray-200">
+                <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200">
                     <div className="flex items-center gap-2">
                         <span className="font-medium">SDK Status:</span>
-                        <span className={`px-2 py-1 rounded text-sm ${isSDKLoaded ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                        <span className={`px-2 py-1 rounded text-sm ${isSDKLoaded ? 'bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-200' : 'bg-red-100 dark:bg-red-800 text-red-800 dark:text-red-200'}`}>
                             {isSDKLoaded ? 'Loaded' : 'Not Loaded'}
                         </span>
                     </div>
                     <div className="flex items-center gap-2 mt-2">
                         <span className="font-medium">Initialized:</span>
-                        <span className={`px-2 py-1 rounded text-sm ${isInitialized ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+                        <span className={`px-2 py-1 rounded text-sm ${isInitialized ? 'bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-200' : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200'}`}>
                             {isInitialized ? 'Yes' : 'No'}
                         </span>
                     </div>
@@ -163,7 +163,7 @@ export default function WebexIntegrationComponent() {
 
                 {/* Error Display */}
                 {error && (
-                    <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-800">
+                    <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 text-red-800 dark:text-red-200">
                         <strong>Error:</strong> {error}
                     </div>
                 )}
@@ -182,7 +182,7 @@ export default function WebexIntegrationComponent() {
 
                 {/* User Information */}
                 {isInitialized && user && (
-                    <div className="p-4 rounded-lg bg-blue-50 border border-blue-200">
+                    <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 text-blue-800 dark:text-blue-200">
                         <h3 className="font-semibold text-lg mb-2">User Information</h3>
                         <div className="space-y-1 text-sm">
                             <div><strong>Display Name:</strong> {user.displayName || 'N/A'}</div>
@@ -241,13 +241,13 @@ export default function WebexIntegrationComponent() {
                 )}
 
                 {/* SDK Information */}
-                <div className="p-3 rounded-lg bg-yellow-50 border border-yellow-200 text-sm">
+                <div className="p-3 rounded-lg bg-yellow-50 dark:bg-yellow-900 border border-yellow-200 dark:border-yellow-700 text-sm text-yellow-800 dark:text-yellow-200">
                     <strong>Note:</strong> This component requires the Webex EAF SDK 2.x to be loaded via CDN or NPM.
-                    Add to your HTML: <code className="bg-white px-1 rounded">&lt;script src=&#34;https://binaries.webex.com/static-content-pipeline/webex-embedded-app-sdk/v2/webex-embedded-app-sdk.js&#34;&gt;&lt;/script&gt;</code>
+                    Add to your HTML: <code className="bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 px-1 rounded">&lt;script src=&#34;https://binaries.webex.com/static-content-pipeline/webex-embedded-app-sdk/v2/webex-embedded-app-sdk.js&#34;&gt;&lt;/script&gt;</code>
                 </div>
 
                 {/* Rate Limiting Info */}
-                <div className="p-3 rounded-lg bg-gray-50 border border-gray-200 text-xs">
+                <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs text-gray-800 dark:text-gray-200">
                     <strong>Rate Limits:</strong>
                     <ul className="list-disc list-inside mt-1">
                         <li>SDK initialization: 5 requests per 5 minutes</li>
@@ -256,7 +256,7 @@ export default function WebexIntegrationComponent() {
                 </div>
 
                 {isInitialized && app && (
-                    <div className="p-3 rounded-lg bg-gray-50 border border-gray-200">
+                    <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200">
                         <h3 className="font-semibold mb-2">App Info:</h3>
                         <div className="space-y-2 text-sm">
                             <div>
@@ -264,19 +264,19 @@ export default function WebexIntegrationComponent() {
                             </div>
                             <div>
                                 <strong>About:</strong>
-                                <pre className="mt-1 p-2 bg-white rounded text-xs overflow-x-auto">
+                                <pre className="mt-1 p-2 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 rounded text-xs overflow-x-auto">
                                     {JSON.stringify(app.about, null, 2)}
                                 </pre>
                             </div>
                             <div>
                                 <strong>Capabilities:</strong>
-                                <pre className="mt-1 p-2 bg-white rounded text-xs overflow-x-auto">
+                                <pre className="mt-1 p-2 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 rounded text-xs overflow-x-auto">
                                     {JSON.stringify(app.capabilities, null, 2)}
                                 </pre>
                             </div>
                             <div>
                                 <strong>User State:</strong>
-                                <pre className="mt-1 p-2 bg-white rounded text-xs overflow-x-auto">
+                                <pre className="mt-1 p-2 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 rounded text-xs overflow-x-auto">
                                     Currently commented out.
                                     {
 
@@ -286,7 +286,7 @@ export default function WebexIntegrationComponent() {
                             </div>
                             <div>
                                 <strong>Call State:</strong>
-                                <pre className="mt-1 p-2 bg-white rounded text-xs overflow-x-auto">
+                                <pre className="mt-1 p-2 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 rounded text-xs overflow-x-auto">
                                     {
 
                                         JSON.stringify(call, null, 2)
