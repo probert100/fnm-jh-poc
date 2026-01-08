@@ -162,12 +162,15 @@ export default function WebexScreenPop({instRtId, instance,screenPopEnabled, min
 
                addLog(`Triggering screen pop for: ${normalizedNumber}`);
 
-               // Simulate click on the URI by creating a temporary anchor and clicking it
-               const link = document.createElement('a');
+                window.location.href = uri;
+                // Simulate click on the URI by creating a temporary anchor and clicking it
+              /* const link = document.createElement('a');
                link.href = uri;
                document.body.appendChild(link);
                link.click();
                document.body.removeChild(link);
+                setTimeout(() => document.body.removeChild(link), 100);
+               */
                 addCurrentLink(uri);
             } else {
                addLog(`Screen pop skipped - enabled: ${screenPopEnabled}, hasRemoteCaller: ${!!remoteCaller}`);
