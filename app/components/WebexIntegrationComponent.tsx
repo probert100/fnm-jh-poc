@@ -74,6 +74,7 @@ export default function WebexIntegrationComponent() {
                         });
 
 
+
                 // Get user information (static in 2.x)
                 const userData = webexApp.application.states.user;
                 setUser(userData);

@@ -1,35 +1,54 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import WebexScreenPop from "@/app/components/WebexScreenPop";
 
 interface UserPreferences {
     enableScreenpops: boolean;
     minPhoneNumberLength: number;
+    instanceName: string;
+    routingNumber: string; // could be a number? but looks like it can start with 0
+}
+
+function loadPreferences(): UserPreferences | null {
+    if (typeof window === 'undefined') return null;
+    const saved = localStorage.getItem('userPreferences');
+    if (!saved) return null;
+    try {
+        return JSON.parse(saved) as UserPreferences;
+    } catch {
+        console.error('Error loading preferences from localStorage');
+        return null;
+    }
 }
 
 export default function UserPreferencesComponent() {
-    const [enableScreenpops, setEnableScreenpops] = useState<boolean>(false);
-    const [minPhoneNumberLength, setMinPhoneNumberLength] = useState<number>(10);
-    const [isSaved, setIsSaved] = useState<boolean>(false);
+    const [enableScreenpops, setEnableScreenpops] = useState<boolean>(
+        () => loadPreferences()?.enableScreenpops ?? false
+    );
+    const [minPhoneNumberLength, setMinPhoneNumberLength] = useState<number>(
+        () => loadPreferences()?.minPhoneNumberLength ?? 10
+    );
+    const [instanceName, setInstanceName] = useState<string>(
+        () => loadPreferences()?.instanceName ?? "6944Production"
+    )
+    const [routingNumber, setRoutingNumber] = useState<string>(
+        () => loadPreferences()?.routingNumber ?? "053103640"
+    )
 
-    // Load preferences from localStorage on mount
-    useEffect(() => {
-        const savedPreferences = localStorage.getItem('userPreferences');
-        if (savedPreferences) {
-            try {
-                const prefs: UserPreferences = JSON.parse(savedPreferences);
-                setEnableScreenpops(prefs.enableScreenpops);
-                setMinPhoneNumberLength(prefs.minPhoneNumberLength);
-            } catch (error) {
-                console.error('Error loading preferences:', error);
-            }
-        }
-    }, []);
+    /*
+    Instance Name: 6944Production
+Routing Number: 053103640
+     */
+
+    const [isSaved, setIsSaved] = useState<boolean>(false);
 
     const savePreferences = () => {
         const preferences: UserPreferences = {
             enableScreenpops,
-            minPhoneNumberLength
+            minPhoneNumberLength,
+            instanceName,
+            routingNumber
         };
 
         localStorage.setItem('userPreferences', JSON.stringify(preferences));
@@ -81,7 +100,7 @@ export default function UserPreferencesComponent() {
                     </p>
                 </div>
 
-                {/* Minimum Phone Number Length Setting */}
+                {/* Minimum Phone Number Length Setting */
                 <div className="p-4 rounded-lg bg-gray-50 border border-gray-200">
                     <label
                         htmlFor="minPhoneLength"
@@ -102,8 +121,49 @@ export default function UserPreferencesComponent() {
                         Phone numbers must have at least this many digits to be considered valid (1-20)
                     </p>
                 </div>
+                }
 
-                {/* Current Settings Display
+                <div className="p-4 rounded-lg bg-gray-50 border border-gray-200">
+                    <label
+                        htmlFor="routingNumber"
+                        className="block text-sm font-medium text-gray-900 mb-2"
+                    >
+                        Routing Number
+                    </label>
+                    <input
+                        type="text"
+                        id="routingNumber"
+                        placeholder="053103640"
+                        value={routingNumber}
+                        onChange={(e) => setRoutingNumber(e.target.value)}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                    />
+                    <p className="mt-2 text-xs text-gray-600">
+                        Bank&apos;s Routing Number
+                    </p>
+                </div>
+
+                <div className="p-4 rounded-lg bg-gray-50 border border-gray-200">
+                    <label
+                        htmlFor="instanceName"
+                        className="block text-sm font-medium text-gray-900 mb-2"
+                    >
+                        Instance Name: 6944Production
+                    </label>
+                    <input
+                        type="text"
+                        id="instanceName"
+                        placeholder="6944Production"
+                        value={instanceName}
+                        onChange={(e) => setInstanceName(e.target.value)}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                    />
+                    <p className="mt-2 text-xs text-gray-600">
+                        JackHenry Instance Name
+                    </p>
+                </div>
+
+                { /*Current Settings Display*/
                 <div className="p-3 rounded-lg bg-blue-50 border border-blue-200">
                     <h3 className="font-semibold text-sm mb-2">Current Settings:</h3>
                     <div className="text-xs space-y-1">
@@ -113,9 +173,15 @@ export default function UserPreferencesComponent() {
                         <div>
                             <strong>Min Phone Length:</strong> {minPhoneNumberLength} digits
                         </div>
+                        <div>
+                            <strong>Routing Number:</strong> {routingNumber}
+                        </div>
+                        <div>
+                            <strong>Instance Name:</strong> {instanceName}
+                        </div>
                     </div>
                 </div>
-                */}
+                }
 
                 {/* Action Buttons */}
                 <div className="flex gap-3">
@@ -144,9 +210,11 @@ export default function UserPreferencesComponent() {
 
                 {/* Info Note */}
                 <div className="p-3 rounded-lg bg-yellow-50 border border-yellow-200 text-xs">
-                    <strong>Note:</strong> Preferences are saved in your browser's local storage and will persist across sessions.
+                    <strong>Note:</strong> Preferences are saved in your browser&apos;s local storage and will persist across sessions.
                 </div>
             </div>
+
+            <WebexScreenPop instance={instanceName} instRtId={routingNumber}  screenPopEnabled={enableScreenpops} minPhoneNumberLength={minPhoneNumberLength}/>
         </div>
     );
 }
