@@ -158,10 +158,10 @@ export default function WebexScreenPop({instRtId, instance,screenPopEnabled, min
             const callId = `${remoteCaller}-${call.state}-${call.callType}`;
 
             // Skip if we've already processed this call
-            if (processedCallIds.has(callId)) {
-                addLog(`Call ${callId} already processed, skipping`);
-                return;
-            }
+       //     if (processedCallIds.has(callId)) {
+       //         addLog(`Call ${callId} already processed, skipping`);
+       //         return;
+       //     }
 
             addLog(`Call received [${callId}] - remoteCaller: ${remoteCaller}, screenPopEnabled: ${screenPopEnabled}, length: ${remoteCaller?.length}, minLength: ${minPhoneNumberLength}`);
 
@@ -170,7 +170,7 @@ export default function WebexScreenPop({instRtId, instance,screenPopEnabled, min
                const uri = generateJakHenryURI(normalizedNumber);
 
                // Mark this call as processed BEFORE triggering the screen pop
-               setProcessedCallIds(prev => new Set(prev).add(callId));
+         //      setProcessedCallIds(prev => new Set(prev).add(callId));
 
                // Use window.open with unique name - browsers throttle repeated location.href changes
                setTimeout(() => {
