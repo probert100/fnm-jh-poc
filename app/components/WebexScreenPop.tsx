@@ -40,11 +40,16 @@ export default function WebexScreenPop({instRtId, instance,screenPopEnabled, min
     const [sidebar, setSidebar] = useState<IWebexAppsSidebar  | null>(null);
     const [call, setCall] = useState<ICall | null>(null);
     const [callLog, setCallLog] = useState<string[]>([])
+    const [currentLink, setCurrentLink] = useState<string>('')
 
     const addLog = useCallback((message: string) => {
         const timestamp = new Date().toLocaleTimeString();
         setCallLog(prev => [...prev, `[${timestamp}] ${message}`]);
     }, [])
+
+    const addCurrentLink = useCallback((link:string)=> {
+        setCurrentLink(link);
+    },[])
 
     const  normalizeUsPhoneNumber = (input: string): string => {
         if (!input) return input;
@@ -151,7 +156,7 @@ export default function WebexScreenPop({instRtId, instance,screenPopEnabled, min
             // eslint-disable-next-line react-hooks/set-state-in-effect -- using functional update pattern for logging
             addLog(`Call received - remoteCaller: ${remoteCaller}, screenPopEnabled: ${screenPopEnabled}, length: ${remoteCaller?.length}, minLength: ${minPhoneNumberLength}`);
 
-            if(screenPopEnabled && remoteCaller && remoteCaller.length > minPhoneNumberLength){
+            if(screenPopEnabled && remoteCaller && remoteCaller.length >= minPhoneNumberLength){
                const normalizedNumber = normalizeUsPhoneNumber(remoteCaller);
                const uri = generateJakHenryURI(normalizedNumber);
 
@@ -163,11 +168,12 @@ export default function WebexScreenPop({instRtId, instance,screenPopEnabled, min
                document.body.appendChild(link);
                link.click();
                document.body.removeChild(link);
+                addCurrentLink(uri);
             } else {
                addLog(`Screen pop skipped - enabled: ${screenPopEnabled}, hasRemoteCaller: ${!!remoteCaller}`);
             }
         }
-    }, [call, screenPopEnabled, minPhoneNumberLength, generateJakHenryURI, addLog]);
+    }, [call, screenPopEnabled, minPhoneNumberLength, generateJakHenryURI, addLog, addCurrentLink]);
 
 
 
@@ -203,6 +209,7 @@ export default function WebexScreenPop({instRtId, instance,screenPopEnabled, min
                                 </pre>
                             </div>
                             <div>
+                                Current Link: <a href={currentLink} target="new">{currentLink}</a>
                                 <strong>Call Log:</strong>
                                 <pre className="mt-1 p-2 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 rounded text-xs overflow-x-auto">
                                     {
