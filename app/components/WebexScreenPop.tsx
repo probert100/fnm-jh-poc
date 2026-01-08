@@ -49,21 +49,13 @@ export default function WebexScreenPop({instRtId, instance,screenPopEnabled, min
         setCallLog(prev => [...prev, `[${timestamp}] ${message}`]);
     }, [])
 
-    const addCurrentLink = useCallback((uri: string) => {
-        setCurrentLink(uri);
-
-        // Use double requestAnimationFrame to ensure click happens AFTER React render + browser paint
-        // This defers execution until after the current render cycle is complete
-        requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-                const link = document.createElement('a');
-                link.href = uri;
-                link.style.display = 'none';
-                document.body.appendChild(link);
-                link.click();
-                setTimeout(() => document.body.removeChild(link), 100);
-            });
-        });
+    const triggerScreenPop = useCallback((uri: string) => {
+        // Use iframe - more reliable for protocol handlers, doesn't rely on click events
+        const iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        iframe.src = uri;
+        document.body.appendChild(iframe);
+        setTimeout(() => document.body.removeChild(iframe), 1000);
     }, [])
 
     const  normalizeUsPhoneNumber = (input: string): string => {
@@ -167,15 +159,8 @@ export default function WebexScreenPop({instRtId, instance,screenPopEnabled, min
 
     useEffect( () => {
         if(call?.state === CALL_STATE.CONNECTED && call.callType === CALL_TYPE.RECEIVED){
-            // Create a unique ID for this call (using caller + state to dedupe within same call)
             const remoteCaller = call.remoteParticipants[0]?.callerID;
             const callId = `${remoteCaller}-${call.state}-${call.callType}`;
-
-            // Skip if we've already processed this call
-       //     if (processedCallIds.has(callId)) {
-       //         addLog(`Call ${callId} already processed, skipping`);
-       //         return;
-       //     }
 
             addLog(`Call received [${callId}] - remoteCaller: ${remoteCaller}, screenPopEnabled: ${screenPopEnabled}, length: ${remoteCaller?.length}, minLength: ${minPhoneNumberLength}`);
 
@@ -183,13 +168,20 @@ export default function WebexScreenPop({instRtId, instance,screenPopEnabled, min
                const normalizedNumber = normalizeUsPhoneNumber(remoteCaller);
                const uri = generateJakHenryURI(normalizedNumber);
 
-               addCurrentLink(uri);
+               setCurrentLink(uri);
                addLog(`Triggering screen pop for: ${normalizedNumber}`);
+
+               // Double RAF ensures click happens AFTER React render + browser paint
+               requestAnimationFrame(() => {
+                   requestAnimationFrame(() => {
+                       triggerScreenPop(uri);
+                   });
+               });
             } else {
                addLog(`Screen pop skipped - enabled: ${screenPopEnabled}, hasRemoteCaller: ${!!remoteCaller}`);
             }
         }
-    }, [call, screenPopEnabled, minPhoneNumberLength, generateJakHenryURI, addLog, addCurrentLink, processedCallIds]);
+    }, [call, screenPopEnabled, minPhoneNumberLength, generateJakHenryURI, addLog, triggerScreenPop]);
 
 
 
