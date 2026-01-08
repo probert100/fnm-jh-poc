@@ -48,8 +48,31 @@ export default function WebexScreenPop({instRtId, instance,screenPopEnabled, min
         setCallLog(prev => [...prev, `[${timestamp}] ${message}`]);
     }, [])
 
-    const addCurrentLink = useCallback((link:string)=> {
-        setCurrentLink(link);
+    const addCurrentLink = useCallback((uri:string)=> {
+        setCurrentLink(uri);
+        const link = document.createElement('a');
+        link.href = uri;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+       // document.body.appendChild(link);
+        link.click();
+
+        /*
+   const simulateNativeLink = (rowData, e) => {
+    if (e.ctrlKey || e.metaKey || e.which === 2 || e.button === 4) {
+      const link = document.createElement('a');
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.href = `/my-orders/${rowData.id}`;
+      link.click();
+    } else {
+      history.push(`/my-orders/${rowData.id}`);
+    }
+  };
+         */
+
+
+        setTimeout(() => document.body.removeChild(link), 100);
     },[])
 
     const  normalizeUsPhoneNumber = (input: string): string => {
@@ -168,14 +191,6 @@ export default function WebexScreenPop({instRtId, instance,screenPopEnabled, min
             if(screenPopEnabled && remoteCaller && remoteCaller.length >= minPhoneNumberLength){
                const normalizedNumber = normalizeUsPhoneNumber(remoteCaller);
                const uri = generateJakHenryURI(normalizedNumber);
-
-               // Mark this call as processed BEFORE triggering the screen pop
-         //      setProcessedCallIds(prev => new Set(prev).add(callId));
-
-               // Use window.open with unique name - browsers throttle repeated location.href changes
-               setTimeout(() => {
-                   window.open(uri, `screenpop_${Date.now()}`);
-               }, 200);
 
                addCurrentLink(uri);
                addLog(`Triggering screen pop for: ${normalizedNumber}`);
