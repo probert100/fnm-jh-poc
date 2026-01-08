@@ -110,10 +110,12 @@ export default function WebexScreenPop({instRtId, instance,screenPopEnabled, min
                 const webexSidebar = await webexApp.context.getSidebar() as IWebexAppsSidebar;
                 if (webexSidebar.badge) {
                     setSidebar(webexSidebar)
-                    const isBadgeSet = await webexSidebar.showBadge({
+                   /* const isBadgeSet = await webexSidebar.showBadge({
                         badgeType: BADGE_TYPE.COUNT,
                         count: 100
                     });
+
+                    */
                 }
 
                 webexApp.listen()

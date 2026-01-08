@@ -53,14 +53,14 @@ export default function WebexIntegrationComponent() {
                 setIsInitialized(true);
 
                 const webexSidebar = await webexApp.context.getSidebar() as IWebexAppsSidebar;
-                if (webexSidebar.badge) {
+             /*   if (webexSidebar.badge) {
                     setSidebar(webexSidebar)
                     const isBadgeSet = await webexSidebar.showBadge({
                         badgeType: BADGE_TYPE.COUNT,
                         count: 100
                     });
                 }
-
+*/
                 webexApp.listen()
                         .then(() => {
                             webexApp.on("sidebar:callStateChanged", (call) => {
