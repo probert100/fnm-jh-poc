@@ -41,6 +41,7 @@ export default function WebexScreenPop({instRtId, instance,screenPopEnabled, min
     const [call, setCall] = useState<ICall | null>(null);
     const [callLog, setCallLog] = useState<string[]>([])
     const [currentLink, setCurrentLink] = useState<string>('')
+    const [processedCallIds, setProcessedCallIds] = useState<Set<string>>(new Set())
 
     const addLog = useCallback((message: string) => {
         const timestamp = new Date().toLocaleTimeString();
@@ -152,32 +153,37 @@ export default function WebexScreenPop({instRtId, instance,screenPopEnabled, min
 
     useEffect( () => {
         if(call?.state === CALL_STATE.CONNECTED && call.callType === CALL_TYPE.RECEIVED){
-            const remoteCaller = call.remoteParticipants[0].callerID;
-            // eslint-disable-next-line react-hooks/set-state-in-effect -- using functional update pattern for logging
-            addLog(`Call received - remoteCaller: ${remoteCaller}, screenPopEnabled: ${screenPopEnabled}, length: ${remoteCaller?.length}, minLength: ${minPhoneNumberLength}`);
+            // Create a unique ID for this call (using caller + state to dedupe within same call)
+            const remoteCaller = call.remoteParticipants[0]?.callerID;
+            const callId = `${remoteCaller}-${call.state}-${call.callType}`;
+
+            // Skip if we've already processed this call
+            if (processedCallIds.has(callId)) {
+                addLog(`Call ${callId} already processed, skipping`);
+                return;
+            }
+
+            addLog(`Call received [${callId}] - remoteCaller: ${remoteCaller}, screenPopEnabled: ${screenPopEnabled}, length: ${remoteCaller?.length}, minLength: ${minPhoneNumberLength}`);
 
             if(screenPopEnabled && remoteCaller && remoteCaller.length >= minPhoneNumberLength){
                const normalizedNumber = normalizeUsPhoneNumber(remoteCaller);
                const uri = generateJakHenryURI(normalizedNumber);
 
-                setTimeout(() => {
-                    window.location.href = uri;
-                    }, 200);
-                // Simulate click on the URI by creating a temporary anchor and clicking it
-              /* const link = document.createElement('a');
-               link.href = uri;
-               document.body.appendChild(link);
-               link.click();
-               document.body.removeChild(link);
-                setTimeout(() => document.body.removeChild(link), 100);
-               */
-                addCurrentLink(uri);
-                addLog(`Triggering screen pop for: ${normalizedNumber}`);
+               // Mark this call as processed BEFORE triggering the screen pop
+               setProcessedCallIds(prev => new Set(prev).add(callId));
+
+               // Use window.open with unique name - browsers throttle repeated location.href changes
+               setTimeout(() => {
+                   window.open(uri, `screenpop_${Date.now()}`);
+               }, 200);
+
+               addCurrentLink(uri);
+               addLog(`Triggering screen pop for: ${normalizedNumber}`);
             } else {
                addLog(`Screen pop skipped - enabled: ${screenPopEnabled}, hasRemoteCaller: ${!!remoteCaller}`);
             }
         }
-    }, [call, screenPopEnabled, minPhoneNumberLength, generateJakHenryURI, addLog, addCurrentLink]);
+    }, [call, screenPopEnabled, minPhoneNumberLength, generateJakHenryURI, addLog, addCurrentLink, processedCallIds]);
 
 
 
