@@ -26,11 +26,12 @@ type WebexScreenPopProps = {
     instRtId: string;
     instance:string;
     screenPopEnabled: boolean;
-    minPhoneNumberLength:number
+    minPhoneNumberLength:number;
+    savePreferences:()=>void
 
 };
 
-export default function WebexScreenPop({instRtId, instance,screenPopEnabled, minPhoneNumberLength }:WebexScreenPopProps) {
+export default function WebexScreenPop({instRtId, instance,screenPopEnabled, minPhoneNumberLength, savePreferences }:WebexScreenPopProps) {
     const [isSDKLoaded, setIsSDKLoaded] = useState(false);
     const [isInitialized, setIsInitialized] = useState(false);
     const [user, setUser] = useState<IWebexAppsUserState | null>(null);
@@ -57,6 +58,10 @@ export default function WebexScreenPop({instRtId, instance,screenPopEnabled, min
        // document.body.appendChild(link);
         link.click();
 
+        setTimeout(()=>{
+            savePreferences()
+        },200)
+
         /*
    const simulateNativeLink = (rowData, e) => {
     if (e.ctrlKey || e.metaKey || e.which === 2 || e.button === 4) {
@@ -69,6 +74,26 @@ export default function WebexScreenPop({instRtId, instance,screenPopEnabled, min
       history.push(`/my-orders/${rowData.id}`);
     }
   };
+         */
+
+        /*
+        // https://stackoverflow.com/questions/40091000/simulate-click-event-on-react-element
+        const mouseClickEvents = ['mousedown', 'click', 'mouseup'];
+function simulateMouseClick(element){
+  mouseClickEvents.forEach(mouseEventType =>
+    element.dispatchEvent(
+      new MouseEvent(mouseEventType, {
+          view: window,
+          bubbles: true,
+          cancelable: true,
+          buttons: 1
+      })
+    )
+  );
+}
+
+var element = document.querySelector('div[class="UFIInputContainer"]');
+simulateMouseClick(element);
          */
 
 
