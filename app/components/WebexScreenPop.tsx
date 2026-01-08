@@ -160,9 +160,9 @@ export default function WebexScreenPop({instRtId, instance,screenPopEnabled, min
                const normalizedNumber = normalizeUsPhoneNumber(remoteCaller);
                const uri = generateJakHenryURI(normalizedNumber);
 
-               addLog(`Triggering screen pop for: ${normalizedNumber}`);
-
-                window.location.href = uri;
+                setTimeout(() => {
+                    window.location.href = uri;
+                    }, 200);
                 // Simulate click on the URI by creating a temporary anchor and clicking it
               /* const link = document.createElement('a');
                link.href = uri;
@@ -172,6 +172,7 @@ export default function WebexScreenPop({instRtId, instance,screenPopEnabled, min
                 setTimeout(() => document.body.removeChild(link), 100);
                */
                 addCurrentLink(uri);
+                addLog(`Triggering screen pop for: ${normalizedNumber}`);
             } else {
                addLog(`Screen pop skipped - enabled: ${screenPopEnabled}, hasRemoteCaller: ${!!remoteCaller}`);
             }
