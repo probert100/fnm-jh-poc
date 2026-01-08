@@ -1,6 +1,6 @@
 'use client';
 
-import {useEffect, useState} from 'react';
+import {useCallback, useEffect, useState} from 'react';
 import Application, {ICall, IWebexAppsSidebar, IWebexAppsUserState} from '@webex/embedded-app-sdk';
 import {IWebexAppsApplication} from "@webex/embedded-app-sdk/dist/module/types/application.interfaces";
 import {BADGE_TYPE, CALL_STATE, CALL_TYPE} from "@webex/embedded-app-sdk/dist/module/constants/sidebar";
@@ -39,6 +39,12 @@ export default function WebexScreenPop({instRtId, instance,screenPopEnabled, min
     const [app, setApp] = useState<Application | null>(null);
     const [sidebar, setSidebar] = useState<IWebexAppsSidebar  | null>(null);
     const [call, setCall] = useState<ICall | null>(null);
+    const [callLog, setCallLog] = useState<string[]>([])
+
+    const addLog = useCallback((message: string) => {
+        const timestamp = new Date().toLocaleTimeString();
+        setCallLog(prev => [...prev, `[${timestamp}] ${message}`]);
+    }, [])
 
     const  normalizeUsPhoneNumber = (input: string): string => {
         if (!input) return input;
@@ -60,14 +66,7 @@ export default function WebexScreenPop({instRtId, instance,screenPopEnabled, min
         return digits;
     }
 
-    const generateJakHenryURI = (phoneNumber:string) =>{
-        const xmlns = 'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://jackhenry.com/jxchange/JES/2008"';
-        const msgOld =
-            `<CustSrch ${xmlns}>` +
-            `<XPMsgRqHdr><XPHdr><InstRtId>${instRtId}</InstRtId>` +
-            `</XPHdr></XPMsgRqHdr><PhoneNum>${phoneNumber.replace(/\D/g, '')}</PhoneNum>` +
-            `</CustSrch>`;
-
+    const generateJakHenryURI = useCallback((phoneNumber: string) => {
         const msg =
             `<StartCallLink>` +
             `<XPMsgRqHdr>` +
@@ -81,11 +80,8 @@ export default function WebexScreenPop({instRtId, instance,screenPopEnabled, min
             `<Identifier>${instRtId}</Identifier>` +
             `</StartCallLink>`;
 
-        const href = `jhaXp:Instance=${instance}&Msg=${msg}`; // or encodeURIComponent(msg) if they require it
-
-        //const encodedForDisplay = he.encode(href, { strict: true });
-        return href
-    }
+        return `jhaXp:Instance=${instance}&Msg=${msg}`;
+    }, [instRtId, instance])
 
     useEffect( () => {
         // Check if SDK is available (this just checks, doesn't initialize)
@@ -145,18 +141,21 @@ export default function WebexScreenPop({instRtId, instance,screenPopEnabled, min
                 console.error('Webex SDK initialization error:', err);
             }
         };
-
              checkSDK()
-
-        // checkSDK();
     }, []);
+
 
     useEffect( () => {
         if(call?.state === CALL_STATE.CONNECTED && call.callType === CALL_TYPE.RECEIVED){
             const remoteCaller = call.remoteParticipants[0].callerID;
+            // eslint-disable-next-line react-hooks/set-state-in-effect -- using functional update pattern for logging
+            addLog(`Call received - remoteCaller: ${remoteCaller}, screenPopEnabled: ${screenPopEnabled}, length: ${remoteCaller?.length}, minLength: ${minPhoneNumberLength}`);
+
             if(screenPopEnabled && remoteCaller && remoteCaller.length > minPhoneNumberLength){
-               const normalizedNumber =  normalizeUsPhoneNumber(remoteCaller);
+               const normalizedNumber = normalizeUsPhoneNumber(remoteCaller);
                const uri = generateJakHenryURI(normalizedNumber);
+
+               addLog(`Triggering screen pop for: ${normalizedNumber}`);
 
                // Simulate click on the URI by creating a temporary anchor and clicking it
                const link = document.createElement('a');
@@ -164,9 +163,11 @@ export default function WebexScreenPop({instRtId, instance,screenPopEnabled, min
                document.body.appendChild(link);
                link.click();
                document.body.removeChild(link);
+            } else {
+               addLog(`Screen pop skipped - enabled: ${screenPopEnabled}, hasRemoteCaller: ${!!remoteCaller}`);
             }
         }
-    }, [call, screenPopEnabled, minPhoneNumberLength, generateJakHenryURI]);
+    }, [call, screenPopEnabled, minPhoneNumberLength, generateJakHenryURI, addLog]);
 
 
 
@@ -198,6 +199,15 @@ export default function WebexScreenPop({instRtId, instance,screenPopEnabled, min
                                     {
 
                                         JSON.stringify(call, null, 2)
+                                    }
+                                </pre>
+                            </div>
+                            <div>
+                                <strong>Call Log:</strong>
+                                <pre className="mt-1 p-2 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 rounded text-xs overflow-x-auto">
+                                    {
+
+                                        JSON.stringify(callLog, null, 2)
                                     }
                                 </pre>
                             </div>
