@@ -27,7 +27,7 @@ type WebexScreenPopProps = {
     instance:string;
     screenPopEnabled: boolean;
     minPhoneNumberLength:number;
-    savePreferences:()=>void
+    savePreferences?:()=>void
 
 };
 
@@ -49,56 +49,22 @@ export default function WebexScreenPop({instRtId, instance,screenPopEnabled, min
         setCallLog(prev => [...prev, `[${timestamp}] ${message}`]);
     }, [])
 
-    const addCurrentLink = useCallback((uri:string)=> {
+    const addCurrentLink = useCallback((uri: string) => {
         setCurrentLink(uri);
-        const link = document.createElement('a');
-        link.href = uri;
-        //link.target = '_blank';
-        //link.rel = 'noopener noreferrer';
-       // document.body.appendChild(link);
-        link.click();
 
-        setTimeout(()=>{
-            savePreferences()
-        },200)
-
-        /*
-   const simulateNativeLink = (rowData, e) => {
-    if (e.ctrlKey || e.metaKey || e.which === 2 || e.button === 4) {
-      const link = document.createElement('a');
-      link.target = '_blank';
-      link.rel = 'noopener noreferrer';
-      link.href = `/my-orders/${rowData.id}`;
-      link.click();
-    } else {
-      history.push(`/my-orders/${rowData.id}`);
-    }
-  };
-         */
-
-        /*
-        // https://stackoverflow.com/questions/40091000/simulate-click-event-on-react-element
-        const mouseClickEvents = ['mousedown', 'click', 'mouseup'];
-function simulateMouseClick(element){
-  mouseClickEvents.forEach(mouseEventType =>
-    element.dispatchEvent(
-      new MouseEvent(mouseEventType, {
-          view: window,
-          bubbles: true,
-          cancelable: true,
-          buttons: 1
-      })
-    )
-  );
-}
-
-var element = document.querySelector('div[class="UFIInputContainer"]');
-simulateMouseClick(element);
-         */
-
-
-        setTimeout(() => document.body.removeChild(link), 100);
-    },[])
+        // Use double requestAnimationFrame to ensure click happens AFTER React render + browser paint
+        // This defers execution until after the current render cycle is complete
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                const link = document.createElement('a');
+                link.href = uri;
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+                setTimeout(() => document.body.removeChild(link), 100);
+            });
+        });
+    }, [])
 
     const  normalizeUsPhoneNumber = (input: string): string => {
         if (!input) return input;
