@@ -50,12 +50,19 @@ export default function WebexScreenPop({instRtId, instance,screenPopEnabled, min
     }, [])
 
     const triggerScreenPop = useCallback((uri: string) => {
-        // Use iframe - more reliable for protocol handlers, doesn't rely on click events
-        const iframe = document.createElement('iframe');
-        iframe.style.display = 'none';
-        iframe.src = uri;
-        document.body.appendChild(iframe);
-        setTimeout(() => document.body.removeChild(iframe), 1000);
+        app?.openUrlInSystemBrowser(uri)
+
+            .catch(error=>{
+                addLog('SystemBrowser Error:'+error);
+
+               // console.log("Error: ", window?.webex?.Application?.ErrorCodes[error]);
+            })
+      //  const link = document.createElement('a');
+      //  link.href = uri;
+      //  link.style.display = 'none';
+      //  document.body.appendChild(link);
+      //  link.click();
+      //  setTimeout(() => document.body.removeChild(link), 100);
     }, [])
 
     const  normalizeUsPhoneNumber = (input: string): string => {
