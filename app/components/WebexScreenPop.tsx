@@ -185,8 +185,12 @@ export default function WebexScreenPop({instRtId, instance,screenPopEnabled, min
                         addLog('SystemBrowser Res:'+value);
                     })
                     .catch(error=>{
-                        addLog('SystemBrowser Error:'+error+" "+window?.webex?.Application?.ErrorCodes[error]);
-                        console.log("Error: ", window?.webex?.Application?.ErrorCodes[error]);
+                        addLog('SystemBrowser Error:'+error);
+                        try{
+                            // @ts-ignore
+                            addLog('SystemBrowser Error details:'+" "+window?.webex?.Application?.ErrorCodes[error]);
+                        }catch (e){}
+                        //console.log("Error: ", window?.webex?.Application?.ErrorCodes[error]);
                     })
 
                // Double RAF ensures click happens AFTER React render + browser paint
