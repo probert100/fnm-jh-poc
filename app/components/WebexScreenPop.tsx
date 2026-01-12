@@ -50,12 +50,14 @@ export default function WebexScreenPop({instRtId, instance,screenPopEnabled, min
     }, [])
 
     const triggerScreenPop = useCallback((uri: string) => {
+        addLog('SystemBrowser openUrlInSystemBrowser started');
         app?.openUrlInSystemBrowser(uri)
-
+            .then(value => {
+                addLog('SystemBrowser Res:'+value);
+            })
             .catch(error=>{
                 addLog('SystemBrowser Error:'+error);
-
-               // console.log("Error: ", window?.webex?.Application?.ErrorCodes[error]);
+              // console.log("Error: ", window?.webex?.Application?.ErrorCodes[error]);
             })
       //  const link = document.createElement('a');
       //  link.href = uri;
@@ -177,13 +179,22 @@ export default function WebexScreenPop({instRtId, instance,screenPopEnabled, min
 
                setCurrentLink(uri);
                addLog(`Triggering screen pop for: ${normalizedNumber}`);
+                addLog('Calling openUrlInSystemBrowser');
+                app?.openUrlInSystemBrowser(uri)
+                    .then(value => {
+                        addLog('SystemBrowser Res:'+value);
+                    })
+                    .catch(error=>{
+                        addLog('SystemBrowser Error:'+error);
+                        // console.log("Error: ", window?.webex?.Application?.ErrorCodes[error]);
+                    })
 
                // Double RAF ensures click happens AFTER React render + browser paint
-               requestAnimationFrame(() => {
+            /*   requestAnimationFrame(() => {
                    requestAnimationFrame(() => {
                        triggerScreenPop(uri);
                    });
-               });
+               });*/
             } else {
                addLog(`Screen pop skipped - enabled: ${screenPopEnabled}, hasRemoteCaller: ${!!remoteCaller}`);
             }

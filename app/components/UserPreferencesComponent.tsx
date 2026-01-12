@@ -164,9 +164,9 @@ Routing Number: 053103640
                 </div>
 
                 { /*Current Settings Display*/
-                <div className="p-3 rounded-lg bg-blue-50 border border-blue-200">
-                    <h3 className="font-semibold text-sm mb-2">Current Settings:</h3>
-                    <div className="text-xs space-y-1">
+                <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-700">
+                    <h3 className="font-semibold text-sm mb-2 text-blue-900 dark:text-blue-100">Current Settings:</h3>
+                    <div className="text-xs space-y-1 text-blue-800 dark:text-blue-200">
                         <div>
                             <strong>Screenpops:</strong> {enableScreenpops ? 'Enabled' : 'Disabled'}
                         </div>
@@ -203,13 +203,13 @@ Routing Number: 053103640
 
                 {/* Save Confirmation */}
                 {isSaved && (
-                    <div className="p-3 rounded-lg bg-green-50 border border-green-200 text-green-800 text-sm">
+                    <div className="p-3 rounded-lg bg-green-50 dark:bg-green-900 border border-green-200 dark:border-green-700 text-green-800 dark:text-green-200 text-sm">
                         <strong>Success!</strong> Your preferences have been saved locally.
                     </div>
                 )}
 
                 {/* Info Note */}
-                <div className="p-3 rounded-lg bg-yellow-50 border border-yellow-200 text-xs">
+                <div className="p-3 rounded-lg bg-yellow-50 dark:bg-yellow-900 border border-yellow-200 dark:border-yellow-700 text-xs text-yellow-800 dark:text-yellow-200">
                     <strong>Note:</strong> Preferences are saved in your browser&apos;s local storage and will persist across sessions.
                 </div>
             </div>
