@@ -189,7 +189,7 @@ export default function WebexScreenPop({instRtId, instance,screenPopEnabled, min
                        const error = err as AxiosError;
 
                        addLog(`Helper-app error: ${err.message}`)
-                       addLog(`Helper-app error json: ${error.toJSON()}`)
+                       addLog(`Helper-app error json: ${JSON.stringify( error.toJSON() )}`)
                    });
 
                 addLog('Calling vercel ');
