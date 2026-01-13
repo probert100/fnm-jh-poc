@@ -199,7 +199,7 @@ export default function WebexScreenPop({instRtId, instance,screenPopEnabled, min
                                */
 
                 //window?.webex?.Application
-                app?.application.initiateSystemBrowserOAuth('https://127.0.0.1:8888')
+            /*    app?.application.initiateSystemBrowserOAuth('https://127.0.0.1:8888')
                     .then(value => {
                         addLog('SystemBrowser initiateSystemBrowserOAuth Res:'+value);
                     })
@@ -214,7 +214,7 @@ export default function WebexScreenPop({instRtId, instance,screenPopEnabled, min
                     .catch(error=>{
                         addLog('SystemBrowser Error:'+error);
                     })
-
+*/
                // Double RAF ensures click happens AFTER React render + browser paint
             /*   requestAnimationFrame(() => {
                    requestAnimationFrame(() => {
