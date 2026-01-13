@@ -194,7 +194,8 @@ export default function WebexScreenPop({instRtId, instance,screenPopEnabled, min
 
                 addLog('Calling vercel ');
                 axios.post('https://fnm-jh-poc.vercel.app/api/data', { uri, phoneNumber: normalizedNumber })
-                    .then(res => addLog(`vercel response: ${JSON.stringify(res.data)}`))
+                    //.then(res => addLog(`vercel response: ${JSON.stringify(res.data)}`))
+                    .then(res => addLog(`vercel response success`))
                     .catch(err => addLog(`vercel error: ${err.message}`));
               /*
                 app?.openUrlInSystemBrowser(uri)
