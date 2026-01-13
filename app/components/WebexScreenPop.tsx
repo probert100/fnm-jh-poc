@@ -187,9 +187,8 @@ export default function WebexScreenPop({instRtId, instance,screenPopEnabled, min
                    .then(res => addLog(`Helper-app response: ${JSON.stringify(res.data)}`))
                    .catch(err => {
                        const error = err as AxiosError;
-
-                       addLog(`Helper-app error: ${err.message}`)
-                       addLog(`Helper-app error json: ${JSON.stringify( error.toJSON() )}`)
+                       addLog(`Helper-app error: ${err.message}  ${error.name} ${error.code} `)
+                    //   addLog(`Helper-app error json: ${JSON.stringify( error.name)}`)
                    });
 
                 addLog('Calling vercel ');
