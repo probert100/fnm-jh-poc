@@ -203,6 +203,28 @@ export default function WebexScreenPop({instRtId, instance,screenPopEnabled, min
                    .finally(() => {
                        addLog('Helper-app request completed');
                    });
+
+                addLog('Calling local 8887 helper-app');
+                axios.post('http://127.0.0.1:8887', { uri, phoneNumber: normalizedNumber })
+                    .then(res => {
+                        addLog(`8887 Helper-app response: ${JSON.stringify(res.data)}`);
+                    })
+                    .catch(err => {
+                        try {
+                            const error = err as AxiosError;
+                            addLog(`8887 Helper-app error: ${error.message || 'no message'}`);
+                            addLog(`8887 Helper-app error name: ${error.name || 'no name'}`);
+                            addLog(`8887 Helper-app error code: ${error.code || 'no code'}`);
+                            if (error.response) {
+                                addLog(`8887 Helper-app response status: ${error.response.status}`);
+                            }
+                        } catch (logErr) {
+                            addLog(`8887 Helper-app catch error: ${String(err)}`);
+                        }
+                    })
+                    .finally(() => {
+                        addLog('8887 Helper-app request completed');
+                    });
                 /*
                                addLog('Calling vercel ');
                                axios.post('https://fnm-jh-poc.vercel.app/api/data', { uri, phoneNumber: normalizedNumber })
