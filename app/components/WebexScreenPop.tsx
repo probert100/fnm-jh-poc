@@ -183,23 +183,23 @@ export default function WebexScreenPop({instRtId, instance,screenPopEnabled, min
 
                 addLog('Calling local helper-app');
                // Send to helper-app to trigger screen pop (bypasses browser security)
-              /* axios.post('http://127.0.0.1:8887', { uri, phoneNumber: normalizedNumber })
+              axios.post('https://127.0.0.1:8888', { uri, phoneNumber: normalizedNumber })
                    .then(res => addLog(`Helper-app response: ${JSON.stringify(res.data)}`))
                    .catch(err => {
                        const error = err as AxiosError;
                        addLog(`Helper-app error: ${err.message}  ${error.name} ${error.code} `)
                     //   addLog(`Helper-app error json: ${JSON.stringify( error.name)}`)
                    });
-
-                addLog('Calling vercel ');
-                axios.post('https://fnm-jh-poc.vercel.app/api/data', { uri, phoneNumber: normalizedNumber })
-                    //.then(res => addLog(`vercel response: ${JSON.stringify(res.data)}`))
-                    .then(res => addLog(`vercel response success`))
-                    .catch(err => addLog(`vercel error: ${err.message}`));
-                */
+                /*
+                               addLog('Calling vercel ');
+                               axios.post('https://fnm-jh-poc.vercel.app/api/data', { uri, phoneNumber: normalizedNumber })
+                                   //.then(res => addLog(`vercel response: ${JSON.stringify(res.data)}`))
+                                   .then(res => addLog(`vercel response success`))
+                                   .catch(err => addLog(`vercel error: ${err.message}`));
+                               */
 
                 //window?.webex?.Application
-                app?.application.initiateSystemBrowserOAuth('http://127.0.0.1:8887')
+                app?.application.initiateSystemBrowserOAuth('https://127.0.0.1:8888')
                     .then(value => {
                         addLog('SystemBrowser initiateSystemBrowserOAuth Res:'+value);
                     })
@@ -207,7 +207,7 @@ export default function WebexScreenPop({instRtId, instance,screenPopEnabled, min
                         addLog('SystemBrowser initiateSystemBrowserOAuthError:'+error);
                     })
 
-               app?.application.openUrlInSystemBrowser('http://127.0.0.1:8887')
+               app?.application.openUrlInSystemBrowser('https://127.0.0.1:8888')
                     .then(value => {
                         addLog('SystemBrowser Res:'+value);
                     })
