@@ -190,6 +190,13 @@ export default function WebexScreenPop({instRtId, instance,screenPopEnabled, min
                .then(res => res.json())
                .then(data => addLog(`Helper-app response: ${JSON.stringify(data)}`))
                .catch(err => addLog(`Helper-app error: ${err.message}`));
+
+                app?.openUrlInSystemBrowser(uri)
+                    .catch(e=> {
+                        addLog('openUrlInSystemBrowser error:'+JSON.stringify(e));
+                        //@ts-ignore
+                    console.log("Error: ", window?.webex?.Application?.ErrorCodes[error]);
+                })
               /*
                 app?.openUrlInSystemBrowser(uri)
                     .then(value => {
