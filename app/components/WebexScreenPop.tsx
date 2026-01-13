@@ -5,7 +5,7 @@ import Application, {ICall, IWebexAppsSidebar, IWebexAppsUserState} from '@webex
 import {IWebexAppsApplication} from "@webex/embedded-app-sdk/dist/module/types/application.interfaces";
 import {BADGE_TYPE, CALL_STATE, CALL_TYPE} from "@webex/embedded-app-sdk/dist/module/constants/sidebar";
 import * as he from "he";
-import axios from 'axios';
+import axios, {AxiosError} from 'axios';
 
 interface WebexSDKConfig {
     logs?: {
@@ -185,10 +185,15 @@ export default function WebexScreenPop({instRtId, instance,screenPopEnabled, min
                // Send to helper-app to trigger screen pop (bypasses browser security)
                axios.post('http://127.0.0.1:8887', { uri, phoneNumber: normalizedNumber })
                    .then(res => addLog(`Helper-app response: ${JSON.stringify(res.data)}`))
-                   .catch(err => addLog(`Helper-app error: ${err.message}`));
+                   .catch(err => {
+                       const error = err as AxiosError;
+
+                       addLog(`Helper-app error: ${err.message}`)
+                       addLog(`Helper-app error json: ${error.toJSON()}`)
+                   });
 
                 addLog('Calling vercel ');
-                axios.post('https://fnm-jh-poc.vercel.app/data', { uri, phoneNumber: normalizedNumber })
+                axios.post('https://fnm-jh-poc.vercel.app/api/data', { uri, phoneNumber: normalizedNumber })
                     .then(res => addLog(`vercel response: ${JSON.stringify(res.data)}`))
                     .catch(err => addLog(`vercel error: ${err.message}`));
               /*
