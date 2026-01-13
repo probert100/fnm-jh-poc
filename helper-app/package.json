@@ -1,0 +1,65 @@
+{
+  "name": "ivi-helper-app",
+  "version": "1.0.0",
+  "description": "HTTP logger service that listens on port 8887",
+  "main": "dist/main.js",
+  "scripts": {
+    "build": "tsc && cp src/index.html dist/ && cp src/icon.ico dist/",
+    "start": "npm run build && electron .",
+    "dev": "tsc && cp src/index.html dist/ && cp src/icon.png dist/icon.png && electron .",
+    "dist": "npm run build && electron-builder",
+    "dist:win": "npm run build && electron-builder --win",
+    "dist:mac": "npm run build && electron-builder --mac",
+    "dist:linux": "npm run build && electron-builder --linux"
+  },
+  "keywords": [
+    "electron",
+    "http",
+    "logger"
+  ],
+  "author": "Intelligent Visibility",
+  "license": "ISC",
+  "build": {
+    "appId": "com.intelligentvisibility.helper",
+    "productName": "iVi Helper App",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        },
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "src/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "src/icon.ico",
+      "uninstallerIcon": "src/icon.ico"
+    },
+    "mac": {
+      "target": ["dmg"],
+      "icon": "src/img.png"
+    },
+    "linux": {
+      "target": ["AppImage"],
+      "icon": "src/icon.png"
+    }
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.7",
+    "electron": "^39.2.7",
+    "electron-builder": "^26.4.0",
+    "typescript": "^5.9.3"
+  }
+}

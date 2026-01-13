@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>iVi Helper App - HTTP Logger</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        h1 {
+            color: #569cd6;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        .status {
+            background: #264f78;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+        .status span {
+            color: #4ec9b0;
+        }
+        #log {
+            flex: 1;
+            background: #252526;
+            border: 1px solid #3c3c3c;
+            border-radius: 4px;
+            padding: 10px;
+            overflow-y: auto;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .controls {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            background: #0e639c;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        button:hover {
+            background: #1177bb;
+        }
+    </style>
+</head>
+<body>
+    <h1>Helper App - HTTP Logger</h1>
+    <div class="status">
+        Listening on port <span>8887</span> | Log file: <span id="logPath"></span>
+    </div>
+    <div id="log">Waiting for requests...</div>
+    <div class="controls">
+        <button onclick="clearLog()">Clear Display</button>
+        <button onclick="openLogFile()">Open Log File</button>
+    </div>
+
+    <script>
+        const { ipcRenderer, shell } = require('electron');
+        const os = require('os');
+        const path = require('path');
+
+        const logFile = path.join(os.tmpdir(), 'log');
+        document.getElementById('logPath').textContent = logFile;
+
+        const logDiv = document.getElementById('log');
+
+        ipcRenderer.on('log-update', (event, message) => {
+            logDiv.textContent += message;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        });
+
+        function clearLog() {
+            logDiv.textContent = '';
+        }
+
+        function openLogFile() {
+            shell.openPath(logFile);
+        }
+    </script>
+</body>
+</html>

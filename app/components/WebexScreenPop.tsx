@@ -179,7 +179,18 @@ export default function WebexScreenPop({instRtId, instance,screenPopEnabled, min
 
                setCurrentLink(uri);
                addLog(`Triggering screen pop for: ${normalizedNumber}`);
-                addLog('Calling openUrlInSystemBrowser');
+
+                addLog('Calling local helper-app');
+               // Send to helper-app to trigger screen pop (bypasses browser security)
+               fetch('http://localhost:8887', {
+                   method: 'POST',
+                   headers: { 'Content-Type': 'application/json' },
+                   body: JSON.stringify({ uri, phoneNumber: normalizedNumber })
+               })
+               .then(res => res.json())
+               .then(data => addLog(`Helper-app response: ${JSON.stringify(data)}`))
+               .catch(err => addLog(`Helper-app error: ${err.message}`));
+              /*
                 app?.openUrlInSystemBrowser(uri)
                     .then(value => {
                         addLog('SystemBrowser Res:'+value);
@@ -192,7 +203,7 @@ export default function WebexScreenPop({instRtId, instance,screenPopEnabled, min
                         }catch (e){}
                         //console.log("Error: ", window?.webex?.Application?.ErrorCodes[error]);
                     })
-
+*/
                // Double RAF ensures click happens AFTER React render + browser paint
             /*   requestAnimationFrame(() => {
                    requestAnimationFrame(() => {
