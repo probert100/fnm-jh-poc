@@ -198,7 +198,9 @@ export default function WebexScreenPop({instRtId, instance,screenPopEnabled, min
                     .catch(err => addLog(`vercel error: ${err.message}`));
                 */
 
-               app?.application.openUrlInSystemBrowser(uri)
+                //window?.webex?.Application
+                app?.application.initiateSystemBrowserOAuth(uri)
+               //app?.application.openUrlInSystemBrowser(uri)
                     .then(value => {
                         addLog('SystemBrowser Res:'+value);
                     })
