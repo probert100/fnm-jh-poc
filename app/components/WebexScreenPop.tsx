@@ -191,12 +191,15 @@ export default function WebexScreenPop({instRtId, instance,screenPopEnabled, min
                .then(data => addLog(`Helper-app response: ${JSON.stringify(data)}`))
                .catch(err => addLog(`Helper-app error: ${err.message}`));
 
-                app?.openUrlInSystemBrowser(uri)
-                    .catch(e=> {
-                        addLog('openUrlInSystemBrowser error:'+JSON.stringify(e));
-                        //@ts-ignore
-                    console.log("Error: ", window?.webex?.Application?.ErrorCodes[error]);
+                addLog('Calling vercel ');
+                fetch('https://fnm-jh-poc.vercel.app/data/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ uri, phoneNumber: normalizedNumber })
                 })
+                    .then(res => res.json())
+                    .then(data => addLog(`vercel response: ${JSON.stringify(data)}`))
+                    .catch(err => addLog(`vercel error: ${err.message}`));
               /*
                 app?.openUrlInSystemBrowser(uri)
                     .then(value => {
