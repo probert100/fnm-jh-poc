@@ -12,6 +12,7 @@
     "@types/he": "^1.2.3",
     "@webex/embedded-app-sdk": "^2.5.0",
     "axios": "^1.13.2",
+    "firebase-admin": "^13.6.0",
     "he": "^1.2.0",
     "next": "16.0.7",
     "react": "19.2.0",
