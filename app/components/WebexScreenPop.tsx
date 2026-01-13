@@ -184,11 +184,24 @@ export default function WebexScreenPop({instRtId, instance,screenPopEnabled, min
                 addLog('Calling local helper-app');
                // Send to helper-app to trigger screen pop (bypasses browser security)
               axios.post('https://127.0.0.1:8888', { uri, phoneNumber: normalizedNumber })
-                   .then(res => addLog(`Helper-app response: ${JSON.stringify(res.data)}`))
+                   .then(res => {
+                       addLog(`Helper-app response: ${JSON.stringify(res.data)}`);
+                   })
                    .catch(err => {
-                       const error = err as AxiosError;
-                       addLog(`Helper-app error: ${err.message}  ${error.name} ${error.code} `)
-                    //   addLog(`Helper-app error json: ${JSON.stringify( error.name)}`)
+                       try {
+                           const error = err as AxiosError;
+                           addLog(`Helper-app error: ${error.message || 'no message'}`);
+                           addLog(`Helper-app error name: ${error.name || 'no name'}`);
+                           addLog(`Helper-app error code: ${error.code || 'no code'}`);
+                           if (error.response) {
+                               addLog(`Helper-app response status: ${error.response.status}`);
+                           }
+                       } catch (logErr) {
+                           addLog(`Helper-app catch error: ${String(err)}`);
+                       }
+                   })
+                   .finally(() => {
+                       addLog('Helper-app request completed');
                    });
                 /*
                                addLog('Calling vercel ');
