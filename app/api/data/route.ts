@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { realtimeDb } from '../../../lib/firebase-admin';
+import { realtimeDb } from '@/lib/firebase-admin';
 
 // Sanitize username for Firebase path (dots not allowed)
 function sanitizeForFirebase(str: string): string {
