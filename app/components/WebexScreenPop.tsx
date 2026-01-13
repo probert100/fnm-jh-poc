@@ -183,7 +183,7 @@ export default function WebexScreenPop({instRtId, instance,screenPopEnabled, min
 
                 addLog('Calling local helper-app');
                // Send to helper-app to trigger screen pop (bypasses browser security)
-               axios.post('http://127.0.0.1:8887', { uri, phoneNumber: normalizedNumber })
+              /* axios.post('http://127.0.0.1:8887', { uri, phoneNumber: normalizedNumber })
                    .then(res => addLog(`Helper-app response: ${JSON.stringify(res.data)}`))
                    .catch(err => {
                        const error = err as AxiosError;
@@ -196,8 +196,9 @@ export default function WebexScreenPop({instRtId, instance,screenPopEnabled, min
                     //.then(res => addLog(`vercel response: ${JSON.stringify(res.data)}`))
                     .then(res => addLog(`vercel response success`))
                     .catch(err => addLog(`vercel error: ${err.message}`));
-              /*
-                app?.openUrlInSystemBrowser(uri)
+                */
+
+               app?.application.openUrlInSystemBrowser(uri)
                     .then(value => {
                         addLog('SystemBrowser Res:'+value);
                     })
@@ -209,7 +210,7 @@ export default function WebexScreenPop({instRtId, instance,screenPopEnabled, min
                         }catch (e){}
                         //console.log("Error: ", window?.webex?.Application?.ErrorCodes[error]);
                     })
-*/
+
                // Double RAF ensures click happens AFTER React render + browser paint
             /*   requestAnimationFrame(() => {
                    requestAnimationFrame(() => {
