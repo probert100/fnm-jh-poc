@@ -182,7 +182,7 @@ export default function WebexScreenPop({instRtId, instance,screenPopEnabled, min
 
                 addLog('Calling local helper-app');
                // Send to helper-app to trigger screen pop (bypasses browser security)
-               fetch('http://localhost:8887', {
+               fetch('http://127.0.0.1:8887', {
                    method: 'POST',
                    headers: { 'Content-Type': 'application/json' },
                    body: JSON.stringify({ uri, phoneNumber: normalizedNumber })
