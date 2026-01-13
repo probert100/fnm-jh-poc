@@ -5,6 +5,7 @@ import Application, {ICall, IWebexAppsSidebar, IWebexAppsUserState} from '@webex
 import {IWebexAppsApplication} from "@webex/embedded-app-sdk/dist/module/types/application.interfaces";
 import {BADGE_TYPE, CALL_STATE, CALL_TYPE} from "@webex/embedded-app-sdk/dist/module/constants/sidebar";
 import * as he from "he";
+import axios from 'axios';
 
 interface WebexSDKConfig {
     logs?: {
@@ -182,23 +183,13 @@ export default function WebexScreenPop({instRtId, instance,screenPopEnabled, min
 
                 addLog('Calling local helper-app');
                // Send to helper-app to trigger screen pop (bypasses browser security)
-               fetch('http://127.0.0.1:8887', {
-                   method: 'POST',
-                   headers: { 'Content-Type': 'application/json' },
-                   body: JSON.stringify({ uri, phoneNumber: normalizedNumber })
-               })
-               .then(res => res.json())
-               .then(data => addLog(`Helper-app response: ${JSON.stringify(data)}`))
-               .catch(err => addLog(`Helper-app error: ${err.message}`));
+               axios.post('http://127.0.0.1:8887', { uri, phoneNumber: normalizedNumber })
+                   .then(res => addLog(`Helper-app response: ${JSON.stringify(res.data)}`))
+                   .catch(err => addLog(`Helper-app error: ${err.message}`));
 
                 addLog('Calling vercel ');
-                fetch('https://fnm-jh-poc.vercel.app/data/', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ uri, phoneNumber: normalizedNumber })
-                })
-                    .then(res => res.json())
-                    .then(data => addLog(`vercel response: ${JSON.stringify(data)}`))
+                axios.post('https://fnm-jh-poc.vercel.app/data', { uri, phoneNumber: normalizedNumber })
+                    .then(res => addLog(`vercel response: ${JSON.stringify(res.data)}`))
                     .catch(err => addLog(`vercel error: ${err.message}`));
               /*
                 app?.openUrlInSystemBrowser(uri)
