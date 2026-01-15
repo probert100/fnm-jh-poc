@@ -141,6 +141,21 @@
             color: #808080;
             margin-top: 3px;
         }
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .checkbox-group input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        .checkbox-group label {
+            margin-bottom: 0;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -167,21 +182,12 @@
             <div class="form-group">
                 <label for="username">Username (Webex email)</label>
                 <input type="text" id="username" placeholder="user@example.com">
-                <div class="hint">Must match the Webex user email that will send screen pops</div>
+                <div class="hint">Must match the Webex user email that will receive screen pops</div>
             </div>
 
-            <div class="form-group">
-                <label for="firebaseConfig">Firebase Config (JSON)</label>
-                <textarea id="firebaseConfig" placeholder='{
-  "apiKey": "...",
-  "authDomain": "...",
-  "databaseURL": "...",
-  "projectId": "...",
-  "storageBucket": "...",
-  "messagingSenderId": "...",
-  "appId": "..."
-}'></textarea>
-                <div class="hint">Paste your Firebase web app config from Firebase Console > Project Settings > Your Apps</div>
+            <div class="checkbox-group">
+                <input type="checkbox" id="autoLaunch" onchange="toggleAutoLaunch()">
+                <label for="autoLaunch">Start automatically when computer starts</label>
             </div>
 
             <div class="controls">
@@ -230,9 +236,6 @@
                 const prefs = await ipcRenderer.invoke('get-preferences');
                 if (prefs) {
                     document.getElementById('username').value = prefs.username || '';
-                    document.getElementById('firebaseConfig').value = prefs.firebaseConfig
-                        ? JSON.stringify(prefs.firebaseConfig, null, 2)
-                        : '';
                     updateFirebaseStatus(prefs.username);
                 }
             } catch (err) {
@@ -245,17 +248,8 @@
 
             try {
                 const username = document.getElementById('username').value.trim();
-                const firebaseConfigText = document.getElementById('firebaseConfig').value.trim();
 
-                let firebaseConfig = null;
-                if (firebaseConfigText) {
-                    firebaseConfig = JSON.parse(firebaseConfigText);
-                }
-
-                const prefs = {
-                    username,
-                    firebaseConfig
-                };
+                const prefs = { username };
 
                 await ipcRenderer.invoke('save-preferences', prefs);
 
@@ -280,8 +274,41 @@
             }
         }
 
-        // Load preferences on startup
+        // Auto-launch handling
+        async function loadAutoLaunchStatus() {
+            try {
+                const isEnabled = await ipcRenderer.invoke('get-auto-launch');
+                document.getElementById('autoLaunch').checked = isEnabled;
+            } catch (err) {
+                console.error('Error loading auto-launch status:', err);
+            }
+        }
+
+        async function toggleAutoLaunch() {
+            const checkbox = document.getElementById('autoLaunch');
+            const statusDiv = document.getElementById('saveStatus');
+
+            try {
+                const result = await ipcRenderer.invoke('set-auto-launch', checkbox.checked);
+                if (result.success) {
+                    statusDiv.textContent = checkbox.checked
+                        ? 'Auto-start enabled - app will start when computer starts'
+                        : 'Auto-start disabled';
+                    statusDiv.className = 'save-status success';
+                } else {
+                    throw new Error(result.error);
+                }
+            } catch (err) {
+                statusDiv.textContent = 'Error setting auto-launch: ' + err.message;
+                statusDiv.className = 'save-status error';
+                // Revert checkbox on error
+                checkbox.checked = !checkbox.checked;
+            }
+        }
+
+        // Load preferences and auto-launch status on startup
         loadPreferencesUI();
+        loadAutoLaunchStatus();
     </script>
 </body>
 </html>

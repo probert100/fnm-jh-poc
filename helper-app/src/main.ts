@@ -4,13 +4,33 @@ import * as https from 'https';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
+import { exec } from 'child_process';
 import selfsigned from 'selfsigned';
+import AutoLaunch from 'auto-launch';
 import { initializeApp, FirebaseApp } from 'firebase/app';
-import { getDatabase, ref, onChildAdded, update, Database, Unsubscribe } from 'firebase/database';
+import { getDatabase, ref, onChildAdded, remove, Database, Unsubscribe } from 'firebase/database';
+
+// Auto-launch configuration
+const autoLauncher = new AutoLaunch({
+    name: 'iVi Helper App',
+    path: app.getPath('exe'),
+});
 
 const HTTP_PORT = 8887;
 const HTTPS_PORT = 8888;
 const LOG_FILE = path.join(os.tmpdir(), 'helper-app.log');
+
+// Pre-bundled Firebase configuration (safe to distribute - security via Firebase Rules)
+const FIREBASE_CONFIG = {
+    apiKey: "AIzaSyBbtDFGf6GPTMtowZoCqy6Mz8Rvs9sjfVs",
+    authDomain: "fnm-jh-ivi.firebaseapp.com",
+    databaseURL: "https://fnm-jh-ivi-default-rtdb.firebaseio.com",
+    projectId: "fnm-jh-ivi",
+    storageBucket: "fnm-jh-ivi.firebasestorage.app",
+    messagingSenderId: "895382657518",
+    appId: "1:895382657518:web:cb3ae9380eb1420fa556ff",
+    measurementId: "G-RGZXX3RSWV"
+};
 
 let mainWindow: BrowserWindow | null = null;
 let tray: Tray | null = null;
@@ -20,18 +40,9 @@ let firebaseApp: FirebaseApp | null = null;
 let firebaseDb: Database | null = null;
 let firebaseUnsubscribe: Unsubscribe | null = null;
 
-// Preferences interface
+// Preferences interface - only username required now
 interface Preferences {
     username: string;
-    firebaseConfig: {
-        apiKey: string;
-        authDomain: string;
-        databaseURL: string;
-        projectId: string;
-        storageBucket: string;
-        messagingSenderId: string;
-        appId: string;
-    };
 }
 
 function getPreferencesPath(): string {
@@ -55,6 +66,36 @@ function savePreferences(prefs: Preferences): void {
     const prefsPath = getPreferencesPath();
     fs.writeFileSync(prefsPath, JSON.stringify(prefs, null, 2), 'utf8');
     logToFile(`Preferences saved to: ${prefsPath}`);
+}
+
+// Auto-detect user email from system
+function getUserEmail(): Promise<string | null> {
+    return new Promise((resolve) => {
+        if (process.platform === 'win32') {
+            // Windows: use whoami /upn for domain-joined machines
+            exec('whoami /upn', (error, stdout) => {
+                if (error) {
+                    logToFile(`Could not detect email via whoami /upn: ${error.message}`);
+                    resolve(null);
+                } else {
+                    const email = stdout.trim();
+                    logToFile(`Detected user email: ${email}`);
+                    resolve(email);
+                }
+            });
+        } else if (process.platform === 'darwin') {
+            // macOS: try to get from directory service
+            exec('dscl . -read /Users/$USER EMailAddress 2>/dev/null | cut -d" " -f2', (error, stdout) => {
+                const email = stdout?.trim() || null;
+                if (email) {
+                    logToFile(`Detected user email: ${email}`);
+                }
+                resolve(email);
+            });
+        } else {
+            resolve(null);
+        }
+    });
 }
 
 interface CertPaths {
@@ -135,14 +176,14 @@ function sanitizeForFirebase(str: string): string {
 
 // Firebase listener
 function startFirebaseListener(prefs: Preferences): void {
-    if (!prefs.firebaseConfig || !prefs.username) {
-        logToFile('Firebase config or username not set, skipping Firebase listener');
+    if (!prefs.username) {
+        logToFile('Username not set, skipping Firebase listener');
         return;
     }
 
     try {
-        // Initialize Firebase
-        firebaseApp = initializeApp(prefs.firebaseConfig);
+        // Initialize Firebase with pre-bundled config
+        firebaseApp = initializeApp(FIREBASE_CONFIG);
         firebaseDb = getDatabase(firebaseApp);
 
         const sanitizedUsername = sanitizeForFirebase(prefs.username);
@@ -160,15 +201,17 @@ function startFirebaseListener(prefs: Preferences): void {
                     // Open the URI
                     await shell.openExternal(data.uri);
                     logToFile(`Screen pop triggered successfully for: ${data.phoneNumber}`);
-
-                    // Mark as processed
-                    await update(ref(firebaseDb!, `screenPops/${sanitizedUsername}/${snapshot.key}`), {
-                        processed: true,
-                        processedAt: Date.now()
-                    });
                 } catch (err) {
                     logToFile(`Error opening URI: ${err}`);
                 }
+                try {
+                    // Remove from database after processing
+                    await remove(ref(firebaseDb!, `screenPops/${sanitizedUsername}/${snapshot.key}`));
+                    logToFile(`Screen pop removed from database`);
+                }catch (err) {
+                    logToFile(`Error removing processed data: ${err}`);
+                }
+
             }
         });
 
@@ -287,9 +330,7 @@ function createWindow(): void {
         mainWindow?.hide();
     });
 
-    mainWindow.on('ready-to-show', () => {
-        mainWindow?.show();
-    });
+    // Window starts minimized to tray - user can show via tray icon
 }
 
 function createTray(): void {
@@ -346,10 +387,36 @@ ipcMain.handle('get-preferences-path', () => {
     return getPreferencesPath();
 });
 
-app.whenReady().then(() => {
+// IPC handlers for auto-launch
+ipcMain.handle('get-auto-launch', async () => {
+    try {
+        return await autoLauncher.isEnabled();
+    } catch (err) {
+        logToFile(`Error checking auto-launch status: ${err}`);
+        return false;
+    }
+});
+
+ipcMain.handle('set-auto-launch', async (_event, enabled: boolean) => {
+    try {
+        if (enabled) {
+            await autoLauncher.enable();
+            logToFile('Auto-launch enabled');
+        } else {
+            await autoLauncher.disable();
+            logToFile('Auto-launch disabled');
+        }
+        return { success: true };
+    } catch (err) {
+        logToFile(`Error setting auto-launch: ${err}`);
+        return { success: false, error: String(err) };
+    }
+});
+
+app.whenReady().then(async () => {
     fs.writeFileSync(LOG_FILE, `=== Helper App Started ===\n`, 'utf8');
 
-    startServers();
+    await startServers();
     createWindow();
 
     const iconPath = path.join(__dirname, 'icon.png');
@@ -357,12 +424,34 @@ app.whenReady().then(() => {
         createTray();
     }
 
-    // Start Firebase listener if preferences exist
-    const prefs = loadPreferences();
-    if (prefs) {
+    // Enable auto-launch by default
+    try {
+        const isEnabled = await autoLauncher.isEnabled();
+        if (!isEnabled) {
+            await autoLauncher.enable();
+            logToFile('Auto-launch enabled by default');
+        }
+    } catch (err) {
+        logToFile(`Error enabling auto-launch: ${err}`);
+    }
+
+    // Start Firebase listener if preferences exist, or auto-detect on first run
+    let prefs = loadPreferences();
+    if (!prefs) {
+        // First run - try to auto-detect user email
+        logToFile('No preferences found. Attempting to auto-detect user email...');
+        const detectedEmail = await getUserEmail();
+        if (detectedEmail) {
+            prefs = { username: detectedEmail };
+            savePreferences(prefs);
+            logToFile(`Auto-configured username: ${detectedEmail}`);
+        } else {
+            logToFile('Could not auto-detect email. Please configure username in Preferences.');
+        }
+    }
+
+    if (prefs?.username) {
         startFirebaseListener(prefs);
-    } else {
-        logToFile('No preferences found. Please configure username and Firebase settings.');
     }
 });
 
