@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "fnm-jh-ivi"
-  }
+    "default": "fnm-jh-ivi",
+    "staging": "fnm-jh-ivi"
+  },
+  "targets": {},
+  "etags": {}
 }
