@@ -44,6 +44,7 @@ export default function WebexScreenPop({instRtId, instance,screenPopEnabled, min
     const [callLog, setCallLog] = useState<string[]>([])
     const [currentLink, setCurrentLink] = useState<string>('')
     const [processedCallIds, setProcessedCallIds] = useState<Set<string>>(new Set())
+    const [isDebugExpanded, setIsDebugExpanded] = useState(false)
 
     const addLog = useCallback((message: string) => {
         const timestamp = new Date().toLocaleTimeString();
@@ -60,12 +61,6 @@ export default function WebexScreenPop({instRtId, instance,screenPopEnabled, min
                 addLog('SystemBrowser Error:'+error);
               // console.log("Error: ", window?.webex?.Application?.ErrorCodes[error]);
             })
-      //  const link = document.createElement('a');
-      //  link.href = uri;
-      //  link.style.display = 'none';
-      //  document.body.appendChild(link);
-      //  link.click();
-      //  setTimeout(() => document.body.removeChild(link), 100);
     }, [])
 
     const  normalizeUsPhoneNumber = (input: string): string => {
@@ -128,12 +123,6 @@ export default function WebexScreenPop({instRtId, instance,screenPopEnabled, min
                 const webexSidebar = await webexApp.context.getSidebar() as IWebexAppsSidebar;
                 if (webexSidebar.badge) {
                     setSidebar(webexSidebar)
-                   /* const isBadgeSet = await webexSidebar.showBadge({
-                        badgeType: BADGE_TYPE.COUNT,
-                        count: 100
-                    });
-
-                    */
                 }
 
                 webexApp.listen()
@@ -182,9 +171,9 @@ export default function WebexScreenPop({instRtId, instance,screenPopEnabled, min
                addLog(`Triggering screen pop for: ${normalizedNumber}`);
 
                 // Send to Firebase via Vercel API
-                const username = user?.email || user?.id || 'test@example.com';
+                const username = user?.email || user?.id || 'unknown';
                 addLog(`Sending to Firebase for user: ${username}`);
-                axios.post('https://fnm-jh-poc.vercel.app/api/data', {
+                axios.post('/api/data', {
                     username,
                     uri,
                     phoneNumber: normalizedNumber
@@ -200,29 +189,7 @@ export default function WebexScreenPop({instRtId, instance,screenPopEnabled, min
                         addLog('Firebase request completed');
                     });
 
-                //window?.webex?.Application
-            /*    app?.application.initiateSystemBrowserOAuth('https://127.0.0.1:8888')
-                    .then(value => {
-                        addLog('SystemBrowser initiateSystemBrowserOAuth Res:'+value);
-                    })
-                    .catch(error=>{
-                        addLog('SystemBrowser initiateSystemBrowserOAuthError:'+error);
-                    })
 
-               app?.application.openUrlInSystemBrowser('https://127.0.0.1:8888')
-                    .then(value => {
-                        addLog('SystemBrowser Res:'+value);
-                    })
-                    .catch(error=>{
-                        addLog('SystemBrowser Error:'+error);
-                    })
-*/
-               // Double RAF ensures click happens AFTER React render + browser paint
-            /*   requestAnimationFrame(() => {
-                   requestAnimationFrame(() => {
-                       triggerScreenPop(uri);
-                   });
-               });*/
             } else {
                addLog(`Screen pop skipped - enabled: ${screenPopEnabled}, hasRemoteCaller: ${!!remoteCaller}`);
             }
@@ -234,7 +201,7 @@ export default function WebexScreenPop({instRtId, instance,screenPopEnabled, min
     return (
         <div className="space-y-4">
             <div className="flex flex-col gap-3">
-                <h2 className="text-xl font-semibold">F&M Integration</h2>
+                <h2 className="text-xl font-semibold">Integration Events:</h2>
 
                 {/* Error Display */}
                 {error && (
@@ -249,30 +216,38 @@ export default function WebexScreenPop({instRtId, instance,screenPopEnabled, min
 
 
                 {isInitialized && app && (
-                    <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200">
-                        <h3 className="font-semibold mb-2">App Info:</h3>
-                        <div className="space-y-2 text-sm">
-
-                            <div>
-                                <strong>Call State:</strong>
-                                <pre className="mt-1 p-2 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 rounded text-xs overflow-x-auto">
-                                    {
-
-                                        JSON.stringify(call, null, 2)
-                                    }
-                                </pre>
+                    <div className="rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200">
+                        <button
+                            onClick={() => setIsDebugExpanded(!isDebugExpanded)}
+                            className="w-full p-3 flex items-center justify-between text-left hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                        >
+                            <h3 className="font-semibold">Call Events</h3>
+                            <span className="text-gray-500 dark:text-gray-400">
+                                {isDebugExpanded ? '▼' : '▶'}
+                            </span>
+                        </button>
+                        {isDebugExpanded && (
+                            <div className="p-3 pt-0 space-y-2 text-sm">
+                                <div>
+                                    <strong>Call State:</strong>
+                                    <pre className="mt-1 p-2 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 rounded text-xs overflow-x-auto">
+                                        {JSON.stringify(call, null, 2)}
+                                    </pre>
+                                </div>
+                                <div>
+                                    <strong>Current Link:</strong>{' '}
+                                    <a href={currentLink} target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 break-all">
+                                        {currentLink || '(none)'}
+                                    </a>
+                                </div>
+                                <div>
+                                    <strong>Call Log:</strong>
+                                    <pre className="mt-1 p-2 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 rounded text-xs overflow-x-auto max-h-48 overflow-y-auto">
+                                        {JSON.stringify(callLog, null, 2)}
+                                    </pre>
+                                </div>
                             </div>
-                            <div>
-                                Current Link: <a href={currentLink} target="new">{currentLink}</a>
-                                <strong>Call Log:</strong>
-                                <pre className="mt-1 p-2 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 rounded text-xs overflow-x-auto">
-                                    {
-
-                                        JSON.stringify(callLog, null, 2)
-                                    }
-                                </pre>
-                            </div>
-                        </div>
+                        )}
                     </div>
                 )}
 

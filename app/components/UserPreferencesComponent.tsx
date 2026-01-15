@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import WebexScreenPop from "@/app/components/WebexScreenPop";
 
 interface UserPreferences {
@@ -9,6 +9,13 @@ interface UserPreferences {
     instanceName: string;
     routingNumber: string; // could be a number? but looks like it can start with 0
 }
+
+const DEFAULT_PREFERENCES: UserPreferences = {
+    enableScreenpops: false,
+    minPhoneNumberLength: 10,
+    instanceName: "6944Production",
+    routingNumber: "053103640"
+};
 
 function loadPreferences(): UserPreferences | null {
     if (typeof window === 'undefined') return null;
@@ -23,18 +30,24 @@ function loadPreferences(): UserPreferences | null {
 }
 
 export default function UserPreferencesComponent() {
-    const [enableScreenpops, setEnableScreenpops] = useState<boolean>(
-        () => loadPreferences()?.enableScreenpops ?? false
-    );
-    const [minPhoneNumberLength, setMinPhoneNumberLength] = useState<number>(
-        () => loadPreferences()?.minPhoneNumberLength ?? 10
-    );
-    const [instanceName, setInstanceName] = useState<string>(
-        () => loadPreferences()?.instanceName ?? "6944Production"
-    )
-    const [routingNumber, setRoutingNumber] = useState<string>(
-        () => loadPreferences()?.routingNumber ?? "053103640"
-    )
+    // Initialize with defaults to avoid hydration mismatch
+    const [enableScreenpops, setEnableScreenpops] = useState<boolean>(DEFAULT_PREFERENCES.enableScreenpops);
+    const [minPhoneNumberLength, setMinPhoneNumberLength] = useState<number>(DEFAULT_PREFERENCES.minPhoneNumberLength);
+    const [instanceName, setInstanceName] = useState<string>(DEFAULT_PREFERENCES.instanceName);
+    const [routingNumber, setRoutingNumber] = useState<string>(DEFAULT_PREFERENCES.routingNumber);
+    const [isHydrated, setIsHydrated] = useState(false);
+
+    // Load preferences from localStorage after hydration
+    useEffect(() => {
+        const saved = loadPreferences();
+        if (saved) {
+            setEnableScreenpops(saved.enableScreenpops);
+            setMinPhoneNumberLength(saved.minPhoneNumberLength);
+            setInstanceName(saved.instanceName);
+            setRoutingNumber(saved.routingNumber);
+        }
+        setIsHydrated(true);
+    }, []);
 
     /*
     Instance Name: 6944Production
@@ -92,7 +105,7 @@ Routing Number: 053103640
                             htmlFor="enableScreenpops"
                             className="text-sm font-medium text-gray-900 cursor-pointer select-none"
                         >
-                            Enable Screenpops
+                            Enable Screen Pops
                         </label>
                     </div>
                     <p className="mt-2 text-xs text-gray-600 ml-8">
@@ -134,6 +147,7 @@ Routing Number: 053103640
                         type="text"
                         id="routingNumber"
                         placeholder="053103640"
+                        disabled={true}
                         value={routingNumber}
                         onChange={(e) => setRoutingNumber(e.target.value)}
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
@@ -154,6 +168,7 @@ Routing Number: 053103640
                         type="text"
                         id="instanceName"
                         placeholder="6944Production"
+                        disabled={true}
                         value={instanceName}
                         onChange={(e) => setInstanceName(e.target.value)}
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
@@ -168,7 +183,7 @@ Routing Number: 053103640
                     <h3 className="font-semibold text-sm mb-2 text-blue-900 dark:text-blue-100">Current Settings:</h3>
                     <div className="text-xs space-y-1 text-blue-800 dark:text-blue-200">
                         <div>
-                            <strong>Screenpops:</strong> {enableScreenpops ? 'Enabled' : 'Disabled'}
+                            <strong>Screen Pops:</strong> {enableScreenpops ? 'Enabled' : 'Disabled'}
                         </div>
                         <div>
                             <strong>Min Phone Length:</strong> {minPhoneNumberLength} digits

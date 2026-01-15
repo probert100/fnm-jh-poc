@@ -17,12 +17,12 @@ export default function InfoBanner() {
             d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
           />
         </svg>
-        <h2 className="text-2xl font-bold">Proof of Concept</h2>
+        <h2 className="text-2xl font-bold">JH Screen Pop</h2>
       </div>
       <p className="text-blue-50 text-lg leading-relaxed">
-        This is a proof of concept testing of integration between browser and Jack Henry
-        created by <span className="font-semibold">Intelligent Visibility</span> • December 2025
+         Integration between Webex and Jack Henry
       </p>
+        <p>Created by <span className="font-semibold">Intelligent Visibility</span> • January 2026 </p>
     </div>
   );
 }
