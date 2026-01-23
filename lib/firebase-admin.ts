@@ -1,11 +1,13 @@
-import { initializeApp, getApps, cert, App } from 'firebase-admin/app';
-import { getDatabase, Database } from 'firebase-admin/database';
+// Use dynamic imports to avoid Turbopack bundling issues with firebase-admin
+import type { App } from 'firebase-admin/app';
+import type { Database } from 'firebase-admin/database';
 
 let app: App | undefined;
 let db: Database | undefined;
 
-function getApp(): App {
+async function getApp(): Promise<App> {
     if (!app) {
+        const { initializeApp, getApps, cert } = await import('firebase-admin/app');
         if (getApps().length === 0) {
             app = initializeApp({
                 credential: cert({
@@ -22,11 +24,17 @@ function getApp(): App {
     return app;
 }
 
+async function getDb(): Promise<Database> {
+    if (!db) {
+        const { getDatabase } = await import('firebase-admin/database');
+        db = getDatabase(await getApp());
+    }
+    return db;
+}
+
 export const realtimeDb = {
-    ref: (path: string) => {
-        if (!db) {
-            db = getDatabase(getApp());
-        }
-        return db.ref(path);
+    ref: async (path: string) => {
+        const database = await getDb();
+        return database.ref(path);
     }
 };

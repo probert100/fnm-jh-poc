@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
         const sanitizedUsername = sanitizeForFirebase(username);
 
         // Write to Firebase Realtime DB under /screenPops/{username}/{messageId}
-        const ref = realtimeDb.ref(`screenPops/${sanitizedUsername}`);
+        const ref = await realtimeDb.ref(`screenPops/${sanitizedUsername}`);
         const newMessageRef = ref.push();
 
         await newMessageRef.set({
