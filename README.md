@@ -1,157 +1,219 @@
-# Jack Henry Browser Integration - Proof of Concept
+# Webex + Jack Henry Screen Pop Integration
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-
-This is a proof of concept demonstrating browser integration with Jack Henry's SilverLake system. Built with Next.js and React, this application generates custom protocol hyperlinks (`jhaXp:`) that can launch Jack Henry applications with pre-populated data.
-
-**[View Live Demo](https://fnm-jh-poc.vercel.app/)**
+Automatically trigger screen pops in Jack Henry Xperience when calls are received in Webex.
 
 ## Overview
 
-This POC is part of the learning process for software development with Jack Henry's system. The current focus is learning how to generate specially formatted hyperlinks that, when clicked, trigger the Jack Henry client software with specific transaction data, streamlining workflows between web and desktop environments.
+This integration connects Webex desktop calling with Jack Henry Xperience banking software. When a call is received in Webex, the caller's phone number is used to automatically open the relevant customer record in Jack Henry via the `jhaXp:` custom protocol.
 
-## Based On
+**Live App:** [https://fnm-jh-ivi.web.app/fnm](https://fnm-jh-ivi.web.app/fnm)
 
-This project is a React implementation based on the official Jack Henry Xperience tutorials:
-- [SilverLake Customer Search Hyperlink Tutorial](https://jackhenry.dev/xperience/tutorials/sl-cust-srch-hyperlink/)
-- [CRM Customer Display Hyperlink Tutorial](https://jackhenry.dev/xperience/tutorials/crm-cust-dsp-hyperlink/)
+## Architecture
 
-The components shown in this project are React versions of the examples demonstrated in these tutorials.
+```
+┌─────────────────────────┐     ┌─────────────────────┐     ┌─────────────────────┐
+│   Webex Desktop Client  │     │  Firebase Realtime  │     │    Helper App       │
+│                         │     │      Database       │     │    (Electron)       │
+│  ┌───────────────────┐  │     │                     │     │                     │
+│  │  Embedded Web App │──┼────>│   /screenPops/      │────>│  Subscribe & Launch │
+│  │  (Next.js)        │  │     │     {user}/{msgId}  │     │                     │
+│  └───────────────────┘  │     │                     │     └──────────┬──────────┘
+└─────────────────────────┘     └─────────────────────┘                │
+                                                                       ▼
+                                                         ┌─────────────────────────┐
+                                                         │   Jack Henry Xperience  │
+                                                         │   (jhaXp: protocol)     │
+                                                         └─────────────────────────┘
+```
 
-## Features
+**Why this architecture?** Direct communication between the Webex embedded app and the desktop helper app is not possible due to Webex security restrictions. Firebase Realtime Database serves as a secure message hub. See [ARCHITECTURE.md](documentation/ARCHITECTURE.md) for details on failed approaches and why Firebase is required.
 
-### Customer Search by Name Component
-Generate hyperlinks to search for customers in SilverLake by first name.
+## Components
 
-**Required Fields:**
-- First Name
-- Instance
-- Inst Rt Id
+| Component | Location | Description |
+|-----------|----------|-------------|
+| Web App | `app/` | Next.js app embedded in Webex sidebar |
+| API Route | `app/api/data/` | Writes screen pop events to Firebase |
+| Helper App | `helper-app/` | Electron app that launches Jack Henry |
+| Firebase Config | `lib/firebase-admin.ts` | Firebase Admin SDK initialization |
 
-### Customer Search by Phone Component
-Generate hyperlinks to search for customers in SilverLake by phone number. Phone numbers are automatically sanitized to contain only digits.
+## Prerequisites
 
-**Required Fields:**
-- Phone Number (automatically strips non-digit characters)
-- Instance
-- Inst Rt Id
+- Node.js 18+
+- Firebase project with Realtime Database enabled
+- Webex developer account with Embedded App configured
+- Jack Henry Xperience installed on user desktops
 
-### CRM Customer Display Component
-Generate hyperlinks to display specific customer records in the CRM system.
+## Setup
 
-**Required Fields:**
-- ABA (9-digit routing number)
-- Customer ID
-- Instance
+### 1. Clone and Install
+
+```bash
+git clone <repository-url>
+cd fnm-jh-poc
+npm install
+```
+
+### 2. Configure Environment Variables
+
+Create `.env.local` for local development:
+
+```env
+# Firebase Admin SDK (for API routes)
+FB_ADMIN_PROJECT_ID=your-project-id
+FB_ADMIN_CLIENT_EMAIL=firebase-adminsdk-xxxxx@your-project.iam.gserviceaccount.com
+FB_ADMIN_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----"
+FB_ADMIN_DATABASE_URL=https://your-project-default-rtdb.firebaseio.com
+```
+
+### 3. Configure Webex Embedded App
+
+Add these trusted domains in your Webex Developer Portal:
+- `fnm-jh-ivi.web.app`
+- `fnm-jh-ivi.firebaseapp.com`
+- `fnm-jh-ivi-default-rtdb.firebaseio.com`
+
+### 4. Run Development Server
+
+```bash
+npm run dev
+```
+
+Open [http://localhost:3000/fnm](http://localhost:3000/fnm) to view the app.
+
+## Deployment
+
+### Web App (Firebase Hosting)
+
+The web app deploys automatically via GitHub Actions on push to `main`:
+
+- `.github/workflows/firebase-hosting-merge.yml` - Production deploy
+- `.github/workflows/firebase-hosting-pull-request.yml` - Preview deploys
+
+**Required GitHub Secrets:**
+- `FIREBASE_SERVICE_ACCOUNT_FNM_JH_IVI` - Service account JSON
+- `FB_ADMIN_PROJECT_ID`
+- `FB_ADMIN_CLIENT_EMAIL`
+- `FB_ADMIN_PRIVATE_KEY`
+- `FB_ADMIN_DATABASE_URL`
+
+### Helper App (Electron)
+
+Build the Electron helper app for distribution:
+
+```bash
+cd helper-app
+npm install
+npm run build
+```
+
+## Configuration Options
+
+Users can configure the following in the embedded app:
+
+| Setting | Description | Default |
+|---------|-------------|---------|
+| Enable Screen Pops | Toggle automatic screen pops | Off |
+| Min Phone Length | Minimum digits required to trigger | 10 |
+| Instance Name | Jack Henry instance identifier | 6944Production |
+| Routing Number | Bank routing number for JH | (configured per bank) |
+
+## Data Flow
+
+1. **Incoming Call** - Webex SDK fires `sidebar:callStateChanged` event
+2. **Event Capture** - Embedded app extracts caller ID when call state is `CONNECTED`
+3. **URI Generation** - App creates `jhaXp:` URI with caller phone number
+4. **Firebase Write** - App POSTs to `/api/data` which writes to Firebase
+5. **Real-time Sync** - Firebase notifies subscribed helper app instantly
+6. **App Launch** - Helper calls `shell.openExternal(uri)` to open Jack Henry
+7. **Cleanup** - Helper marks event as processed
+
+## Project Structure
+
+```
+├── app/
+│   ├── fnm/
+│   │   └── page.tsx                      # Main embedded app page
+│   ├── api/
+│   │   └── data/
+│   │       └── route.ts                  # Firebase write endpoint
+│   └── components/
+│       ├── WebexScreenPop.tsx            # Webex SDK integration
+│       ├── UserPreferencesComponent.tsx  # Settings UI
+│       ├── InfoBanner.tsx                # Header banner
+│       ├── CustSrchComponent.tsx         # Customer search by name
+│       ├── CustSrchByPhoneComponent.tsx  # Customer search by phone
+│       └── CRMCustDspComponent.tsx       # CRM customer display
+├── lib/
+│   └── firebase-admin.ts                 # Firebase Admin SDK setup
+├── helper-app/
+│   └── src/
+│       └── main.ts                       # Electron main process
+└── documentation/
+    ├── ARCHITECTURE.md                   # Detailed architecture docs
+    └── diagrams/                         # Architecture diagrams
+```
 
 ## Technical Details
 
 - **Framework:** Next.js 14+ (App Router)
 - **Styling:** Tailwind CSS
-- **Encoding:** HTML entity encoding using the `he` library
-- **Protocol:** Custom `jhaXp:` protocol handler for Jack Henry integration
+- **Webex Integration:** Webex Embedded App SDK
+- **Backend:** Firebase Realtime Database
+- **Desktop:** Electron helper app
+- **Protocol:** Custom `jhaXp:` protocol handler for Jack Henry
 
-### How It Works
-
-1. User fills in required fields in the web form
-2. Application constructs an XML message containing transaction data
-3. Message is encoded and wrapped in a `jhaXp:` protocol URL
-4. Clicking the generated link launches the Jack Henry client with the data
-
-### XML Message Format
+### Jack Henry URI Format
 
 Messages follow Jack Henry's JXchange format:
+```
+jhaXp:Instance={instanceName}&Msg={xmlPayload}
+```
+
+XML payload structure:
 ```xml
-<CustSrch xmlns:xsi="..." xmlns:xsd="..." xmlns="...">
+<StartCallLink>
   <XPMsgRqHdr>
     <XPHdr>
-      <InstRtId>011001276</InstRtId>
+      <ConsumerProd>Xperience</ConsumerProd>
+      <AuditUsrId>XperienceClientAgent</AuditUsrId>
+      <InstRtId>{routingNumber}</InstRtId>
     </XPHdr>
   </XPMsgRqHdr>
-  <FirstName>John</FirstName>
-</CustSrch>
+  <PhoneNum>{phoneNumber}</PhoneNum>
+  <Identifier>{routingNumber}</Identifier>
+</StartCallLink>
 ```
 
-## Getting Started
+## Limitations
 
-### Prerequisites
-- Node.js 18+
-- npm, yarn, pnpm, or bun
+- **Helper App Required** - Users must have the Electron helper app running
+- **Network Dependency** - Requires internet for Firebase communication
+- **Latency** - ~100-500ms delay due to cloud round-trip
+- **Single User** - Helper app subscribes to one Firebase user path
 
-### Installation
+## Troubleshooting
 
-```bash
-npm install
-```
+**Screen pops not working:**
+1. Verify helper app is running
+2. Check Firebase connection in helper app logs
+3. Expand "Call Events" in embedded app to see event log
+4. Verify phone number meets minimum length requirement
 
-### Running the Development Server
+**Firebase permission errors:**
+- Ensure service account has Realtime Database read/write access
+- Check Firebase security rules allow authenticated access
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Based On
 
-Open [http://localhost:3000](http://localhost:3000) to view the application.
-
-### Dependencies
-
-Key dependencies:
-- `he` - HTML entity encoding/decoding
-- `next` - React framework
-- `react` - UI library
-- `tailwindcss` - Styling
-
-## Project Structure
-
-```
-app/
-├── components/
-│   ├── CustSrchComponent.tsx           # Customer search by name form
-│   ├── CustSrchByPhoneComponent.tsx    # Customer search by phone form
-│   ├── CRMCustDspComponent.tsx         # CRM customer display form
-│   └── InfoBanner.tsx                  # Informational banner
-├── page.tsx                             # Main page
-└── layout.tsx                           # Root layout
-```
-
-## Components
-
-### CustSrchComponent
-Generates customer search hyperlinks for SilverLake based on customer first name.
-
-### CustSrchByPhoneComponent
-Generates customer search hyperlinks for SilverLake based on phone number. Automatically sanitizes phone input to include only digits in the generated link.
-
-### CRMCustDspComponent
-Generates CRM customer display hyperlinks.
-
-
-
-## Future Enhancements
-
-- Additional Jack Henry transaction types
-- Form validation and error handling
-- Hyperlink history/favorites
-- Batch link generation
-- Configuration management for instances and routing numbers
-
-## Notes
-
-- This is a proof of concept for demonstration purposes
-- Requires Jack Henry client software to be installed and configured
-- The `jhaXp:` protocol must be registered with the operating system
+Jack Henry Xperience integration tutorials:
+- [SilverLake Customer Search Hyperlink Tutorial](https://jackhenry.dev/xperience/tutorials/sl-cust-srch-hyperlink/)
+- [CRM Customer Display Hyperlink Tutorial](https://jackhenry.dev/xperience/tutorials/crm-cust-dsp-hyperlink/)
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+Proprietary - Intelligent Visibility
 
-## Learn More
+---
 
-- [Next.js Documentation](https://nextjs.org/docs)
-- [Jack Henry Integration Guide](https://www.jackhenry.com/)
-- [Tailwind CSS](https://tailwindcss.com/docs)
+*Created by Intelligent Visibility - January 2026*
